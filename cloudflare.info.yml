@@ -1,0 +1,7 @@
+name: CloudFlare
+type: module
+description: CloudFlare CDN integration.
+core: 8.x
+package: Caching
+configure: cloudflare.admin_settings_form
+
