@@ -4,7 +4,7 @@
  * Contains CloudFlareApiException.
  */
 
-namespace Drupal\cloudflare;
+namespace Drupal\cloudflare\CloudFlarePhpSdk;
 
 /**
  * Defines CloudFlareApiException.

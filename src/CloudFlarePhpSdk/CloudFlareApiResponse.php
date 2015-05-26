@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\cloudflare;
+namespace Drupal\cloudflare\CloudFlarePhpSdk;
 
 use Drupal\Component\Serialization;
 
