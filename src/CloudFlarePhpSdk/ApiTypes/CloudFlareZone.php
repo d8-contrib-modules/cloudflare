@@ -1,5 +1,5 @@
 <?php
-namespace Drupal\cloudflare\ApiTypes;
+namespace Drupal\cloudflare\CloudFlarePhpSdk\ApiTypes;
 
 class CloudFlareZone{
   private $id;

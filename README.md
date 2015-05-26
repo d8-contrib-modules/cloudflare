@@ -1,8 +1,10 @@
 ## Introduction
 
 Provides integration with the Cloudflare API see: https://api.cloudflare.com/
-The module provides an easily extendable PHP SDK to interact with the cloudflare SDK.  By design there is a clear line
-of demarkation between the API interface an the Drupal integration.
+The module provides an easily extendable PHP SDK to interact with the cloudflare SDK.  
+By design there is a clear separation of concerns everything inside the CloudFlarePhpSdk
+namespace is concerned with interacting with the CloudFlare API.  It knows 
+nothing about Drupal.
 
 ## Usage
 
@@ -17,4 +19,3 @@ $api = new \Drupal\cloudflare\CloudFlareAPI($api_key, $user_email );
 $zone_id = $api->listZones()[0]->getId();
 $result = $api->purgeIndividualFiles($zone_id, array('path1'));
 $result = $api->setSecurityLevel($zone_id, 'low');
-```
