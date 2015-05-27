@@ -12,7 +12,6 @@ namespace Drupal\cloudflare\CloudFlarePhpSdk;
  * The purpose of this class is to translate exceptions from API and Guzzle
  * (the tool being used for webservices) to the application layer so that they
  * can be handled accordingly.
- *
  */
 class CloudFlareApiException extends \Exception {
 
@@ -38,13 +37,14 @@ class CloudFlareApiException extends \Exception {
    *
    * @var null|string
    */
-  //protected $message;
-
-
-  public function __construct($httpResponseCode, $apiResponseCode, $message, Exception $previous = NULL) {
-    parent::__construct($message, $apiResponseCode, $previous);
-    $this -> httpResponseCode = $httpResponseCode;
-    $this -> apiResponseCode = $apiResponseCode;
-    $this -> message = $message;
+  /**
+   * Protected $message;.
+   */
+  public function __construct($http_response_code, $api_response_code, $message, Exception $previous = NULL) {
+    parent::__construct($message, $api_response_code, $previous);
+    $this->httpResponseCode = $http_response_code;
+    $this->apiResponseCode = $api_response_code;
+    $this->message = $message;
   }
+
 }
