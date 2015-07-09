@@ -1,0 +1,5 @@
+cloudflare.admin_settings:
+  title: 'CloudFlare Global Settings'
+  description: 'Configure CloudFlare CDN settings.'
+  parent: system.admin_config_development
+  route_name: cloudflare.admin_settings_form
