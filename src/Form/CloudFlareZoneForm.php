@@ -7,15 +7,20 @@
 
 namespace Drupal\cloudflare\Form;
 
+use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
+use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
+
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\cloudflare\CloudFlareZoneSettingRenderer;
+
 
 /**
  * Class DefaultForm.
  *
  * @package Drupal\cloudflare\Form
  */
-class CloudFlareAdminSettingsForm extends ConfigFormBase {
+class CloudFlareZoneForm extends ConfigFormBase {
 
   /**
    * {@inheritdoc}
@@ -37,26 +42,31 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['api_credentials_fieldset'] = [
+
+    $form['zone'] = [
       '#type' => 'fieldset',
-      '#title' => t('Api Credentials'),
+      '#title' => t('Zone Settings'),
     ];
 
-    $config = $this->config('cloudflare.settings');
+    try {
+      $cloudflare_renderer = new CloudFlareZoneSettingRenderer();
+    }
 
-    $form['api_credentials_fieldset']['apikey'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('CloudFlare API Key'),
-      '#description' => $this->t('Your Api key.  Login to cloudflare here to get it.'),
-      '#default_value' => $config->get('apikey'),
-      '#required' => TRUE
-    ];
-    $form['api_credentials_fieldset']['email'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Account Email Address'),
-      '#description' => $this->t('Email '),
-      '#default_value' => $config->get('email'),
-    ];
+    // If we were unable to get results back from the API attempt to provide
+    // meaningful feedback to the user.
+    catch (CloudFlareHttpException $e) {
+      $form['zone']['#description'] = $this->t($e->getMessage());
+      return parent::buildForm($form, $form_state);
+    }
+
+    catch (CloudFlareApiException $e) {
+      $form['zone']['#description'] = $this->t($e->getMessage());
+      return parent::buildForm($form, $form_state);
+    }
+
+    $form['zone']['selected'] = $cloudflare_renderer->buildZoneListing();
+    $zone_render = $cloudflare_renderer->renderZoneSettings();
+    $form['zone']['table'] = $zone_render;
 
     return parent::buildForm($form, $form_state);
   }
@@ -84,6 +94,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
     $this->config('cloudflare.settings')
       ->set('apikey', $form_state->getValue('apikey'))
       ->set('email', $form_state->getValue('email'))
+      ->set('zone', $form_state->getValue('zone'))
       ->save();
   }
 

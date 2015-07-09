@@ -1,0 +1,6 @@
+{
+  "name": "drupal/cloudflare",
+  "require": {
+    "aweingarten/cloudflarephpsdk": "dev-master"
+  }
+}
