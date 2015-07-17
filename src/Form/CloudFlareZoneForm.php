@@ -50,24 +50,34 @@ class CloudFlareZoneForm extends ConfigFormBase {
 
     try {
       $cloudflare_renderer = new CloudFlareZoneSettingRenderer();
+      $form['zone']['selected'] = $cloudflare_renderer->buildZoneListing();
+      $zone_render = $cloudflare_renderer->renderZoneSettings();
+      $form['zone']['table'] = $zone_render;
     }
 
     // If we were unable to get results back from the API attempt to provide
     // meaningful feedback to the user.
     catch (CloudFlareHttpException $e) {
-      $form['zone']['#description'] = $this->t($e->getMessage());
-      return parent::buildForm($form, $form_state);
+      drupal_set_message("Unable to connect to CloudFlare. ". $e->getMessage(),'error');
+      \Drupal::logger('cloudflare')->error($e->getMessage());
+      $form['zone']['#access'] = FALSE;
+      return;
     }
 
     catch (CloudFlareApiException $e) {
-      $form['zone']['#description'] = $this->t($e->getMessage());
-      return parent::buildForm($form, $form_state);
+      drupal_set_message("Unable to connect to CloudFlare. ". $e->getMessage(),'error');
+      \Drupal::logger('cloudflare')->error($e->getMessage());
+      return;
     }
 
-    $form['zone']['selected'] = $cloudflare_renderer->buildZoneListing();
-    $zone_render = $cloudflare_renderer->renderZoneSettings();
-    $form['zone']['table'] = $zone_render;
-
+    // A checkbox is active when #default_value == #return_value.
+    $form['checkbox_on'] = array(
+      '#type' => 'checkbox',
+      '#return_value' => '1',
+      '#default_value' => '1',
+      '#title' => 'checkbox_on',
+    );
+    //unset($form_state);
     return parent::buildForm($form, $form_state);
   }
 
