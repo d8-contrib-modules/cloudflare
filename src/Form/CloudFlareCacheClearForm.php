@@ -11,8 +11,9 @@ use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
 
-use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use foo\bar\Exception;
 
 
 /**
@@ -20,7 +21,7 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * @package Drupal\cloudflare\Form
  */
-class CloudFlareCacheClearForm extends ConfigFormBase {
+class CloudFlareCacheClearForm extends FormBase {
 
   /**
    * {@inheritdoc}
@@ -42,7 +43,6 @@ class CloudFlareCacheClearForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = $this->config('cloudflare.settings');
     $form['path_clearing'] = [
       '#type' => 'fieldset',
       '#title' => t('Path Clear Cache'),
@@ -52,14 +52,13 @@ class CloudFlareCacheClearForm extends ConfigFormBase {
       '#type' => 'textarea',
       '#title' => $this->t('Path\'s to clear'),
       '#description' => $this->t('You can enter multiple paths. One per line. Note CloudFlare\'s API only allows a max of ' . ZoneApi::MAX_PURGES_PER_REQUEST . ' path purges per request. It also does not handle wildcards at this time.'),
-      '#default_value' => $config->get('apikey'),
     ];
 
     $form['path_clearing']['paths_button'] = [
-      '#type' => 'button',
+      '#type' => 'submit',
       '#value' => $this->t('Clear Specified Paths'),
-      '#submit' => ['purgePaths'],
-      '#validate' => ['validatePathClear']
+      '#validate' => [[$this, 'validatePathClear']],
+      '#submit' => ['::purgePaths'],
     ];
 
     $form['cache_clearing'] = [
@@ -67,14 +66,12 @@ class CloudFlareCacheClearForm extends ConfigFormBase {
       '#title' => t('Global Cache Clear'),
     ];
 
-    $form['cache_clearing']['apikey'] = [
-      '#type' => 'button',
-      '#value' => $this->t('Clear Entire Cache'),
-      '#description' => $this->t('Hold on to your butts.'),
-      '#submit' => ['purgeEntireZone'],
+    $form['cache_clearing']['clear_zone_button'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Clear Entire Cachee'),
+      '#submit' => ['::purgeEntireZone'],
     ];
-
-    return parent::buildForm($form, $form_state);
+    return $form;
   }
 
   /**
@@ -88,7 +85,7 @@ class CloudFlareCacheClearForm extends ConfigFormBase {
   public function validatePathClear(array &$form, FormStateInterface $form_state) {
     $raw_paths = $form_state->getValue('paths');
     $paths = explode('\n', $raw_paths);
-    $exceeds_allowed_max_purges = $paths > ZoneApi::MAX_PURGES_PER_REQUEST;
+    $exceeds_allowed_max_purges = count($paths) > ZoneApi::MAX_PURGES_PER_REQUEST;
 
     if ($exceeds_allowed_max_purges) {
       $form_state->setErrorByName('paths', $this->t('Unfortunately you entered more than the maximum number of requests. The CloudFlare api limits you to ' . ZoneApi::MAX_PURGES_PER_REQUEST . 'paths per request.'));
@@ -106,23 +103,39 @@ class CloudFlareCacheClearForm extends ConfigFormBase {
    *   The current state of the form.
    */
   public function purgeEntireZone(array &$form, FormStateInterface $form_state) {
-    $api_key = $this->config->get('apikey');
-    $email = $this->config->get('email');
-    $zone = $this->config->get('zone');
+    $config = \Drupal::config('cloudflare.settings');
+    $api_key = $config->get('apikey');
+    $email = $config->get('email');
+    $zone = $config->get('zone');
+
+
 
     try{
       $this->zoneApi = new ZoneApi($api_key, $email);
+
+      // @todo rethink how to handle cloudflare zones in Drupal.
+      if(is_null($zone)){
+        $zones = $this->zoneApi->listZones();
+        $zone = $zones[0]->getZoneId();
+      }
+
       $this->zoneApi->purgeAllFiles($zone);
     }
 
     catch(CloudFlareHttpException $e) {
-      $form_state->setErrorByName('CloudFlareHttpException', $e->getMessage());
+      drupal_set_message("Unable to clear zone cache. ". $e->getMessage(),'error');
+      \Drupal::logger('cloudflare')->error($e->getMessage());
+      return;
     }
 
     catch(CloudFlareApiException $e) {
-      $form_state->setErrorByName('CloudFlareApiException', $e->getMessage());
+      drupal_set_message("Unable to clear zone cache. ". $e->getMessage(),'error');
+      \Drupal::logger('cloudflare')->error($e->getMessage());
+      return;
     }
 
+    // If no exceptions have been thrown then the request has been successful.
+    drupal_set_message("The zone: $zone was successfully cleared.");
   }
 
   /**
@@ -134,23 +147,41 @@ class CloudFlareCacheClearForm extends ConfigFormBase {
    *   The current state of the form.
    */
   public function purgePaths(array &$form, FormStateInterface $form_state) {
-    $api_key = $this->config->get('apikey');
-    $email = $this->config->get('email');
-    $zone = $this->config->get('zone');
+    $config = $this->config('cloudflare.settings');
+    $api_key = $config->get('apikey');
+    $email = $config->get('email');
+    $zone = $config->get('zone');
 
     try{
-      $this->zoneApi = new ZoneApi($api_key, $email);
-      $this->zoneApi->purgeAllFiles($zone);
+      $zone_api = new ZoneApi($api_key, $email);
+
+      // @todo rethink how to handle cloudflare zones in Drupal.
+      if(is_null($zone)){
+        $zones = $zone_api->listZones();
+        $zone = $zones[0]->getZoneId();
+      }
+      $zone_api->purgeAllFiles($zone);
     }
 
+
     catch(CloudFlareHttpException $e) {
-      $form_state->setErrorByName('CloudFlareHttpException', $e->getMessage());
+      drupal_set_message("Unable to clear paths. ". $e->getMessage(),'error');
+      \Drupal::logger('cloudflare')->error($e->getMessage());
+      return;
     }
 
     catch(CloudFlareApiException $e) {
-      $form_state->setErrorByName('CloudFlareApiException', $e->getMessage());
+      drupal_set_message("Unable to clear paths. ". $e->getMessage(),'error');
+      \Drupal::logger('cloudflare')->error($e->getMessage());
+      return;
     }
 
+    // If no exceptions have been thrown then the request has been successful.
+    drupal_set_message("The zone: $zone was successfully cleared.");
+  }
+
+  //@todo figure out how to replace formbase so that this is not necessary.
+  public function submitForm(array &$form, FormStateInterface $form_state) {
   }
 
 }

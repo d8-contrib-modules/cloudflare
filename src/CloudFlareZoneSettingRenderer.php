@@ -13,7 +13,7 @@ use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityHeader;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityLevel;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecuritySsl;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSsl;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBase;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
@@ -149,35 +149,35 @@ class CloudFlareZoneSettingRenderer {
 
     switch ($current_type) {
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBool':
-        $value_render = ['data' => $this->renderZoneSettingBool($setting)];
+        $value_render = $this->renderZoneSettingBool($setting);
         break;
 
-      case 'ZoneSettingInt':
-        $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = $this->renderZoneSettingInt($setting);
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingInt':
+        $value_render = $this->renderZoneSettingInt($setting);
         break;
 
-      case 'ZoneSettingMinify':
-        $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = $this->renderZoneSettingMinify($setting);
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify':
+        $value_render = $this->renderZoneSettingMinify($setting);
         break;
 
-      case 'ZoneSettingMobileRedirect':
-        $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = $this->renderZoneSettingMobileRedirect($setting);
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect':
+        $value_render = $this->renderZoneSettingMobileRedirect($setting);
         break;
 
       case 'ZoneSettingSecurityHeader':
-        $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = $this->renderZoneSettingSecurityHeader($setting);
+        $value_render = $this->renderZoneSettingSecurityHeader($setting);
         break;
 
-      case 'ZoneSettingSecurityLevel':
-        $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = $this->renderZoneSettingSecurityLevel($setting);
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityLevel':
+        $value_render = $this->renderZoneSettingSecurityLevel($setting);
         break;
 
-      case 'ZoneSettingSsl':
-        $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = $this->renderZoneSettingSsl($setting);
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSsl':
+        $value_render = $this->renderZoneSettingSsl($setting);
         break;
     }
 
-    if (is_null($value_render)) {
+    if ($current_type != 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify') {
       return;
     }
 
@@ -185,14 +185,15 @@ class CloudFlareZoneSettingRenderer {
       '#markup' => $setting->getZoneSettingName()
     ]];
 
-    $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = $value_render;
+    $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = ['data' => $value_render];
+
 
     $render_result[ZoneSettings::SETTING_WRAPPER_EDITABLE] = ['data' => [
       '#markup' => ($setting->isEditable() ? 'Yes' : 'No'),
     ]];
 
     $render_result[ZoneSettings::SETTING_WRAPPER_MODIFIED_ON] = ['data' => [
-      '#markup' => ($setting->getTimeModifiedOnServer() ? $setting->getTimeModifiedOnServer() : 'N/A'),
+      '#markup' => ($setting->getTimeModifiedOnServer() ? format_date($setting->getTimeModifiedOnServer()) : 'N/A'),
     ]];
 
     return $render_result;
@@ -208,21 +209,14 @@ class CloudFlareZoneSettingRenderer {
    *   FormApi render array containing radio buttons.
    */
   private function renderZoneSettingBool(ZoneSettingBool $setting) {
-    $active = [0 => t('Yes'), 1 => t('No')];
     $setting = [
-      '#type' => 'checkboxes',
-      '#title' => t('Autocomplete matching'),
-      '#default_value' => 'STARTS_WITH',
-      '#options' => array(
-        'STARTS_WITH' => t('Starts with'),
-        'CONTAINS' => t('Contains'),
-      ),
-      '#description' => 'blah'
+      '#type' => 'checkbox',
+      '#default_value' => $setting->getValue(),
+//      '#disabled' => !($setting->isEditable()),
     ];
 
     return $setting;
   }
-
 
   /**
    * Builds FormApi TextField for the value of a ZoneSettingInt.
@@ -234,7 +228,14 @@ class CloudFlareZoneSettingRenderer {
    *   FormApi render array containing text field.
    */
   private function renderZoneSettingInt(ZoneSettingInt $setting) {
+    $setting = [
+      '#type' => 'textfield',
+      '#default_value' => $setting->getValue(),
+      '#size' => 20,
+      '#disabled' => !($setting->isEditable())
+    ];
 
+    return $setting;
   }
 
   /**
@@ -248,12 +249,61 @@ class CloudFlareZoneSettingRenderer {
    *   settings.
    */
   private function renderZoneSettingMinify(ZoneSettingMinify $setting) {
+    $js_checkbox = [
+      '#type' => 'checkbox',
+      '#title' => 'JS',
+      '#return_value' => '1',
+      '#default_value' => $setting->isJsMinifyEnabled() ? '1': '0',
+//      '#disabled' => !($setting->isEditable()),
+    ];
 
+    $css_checkbox = [
+      '#type' => 'checkbox',
+      '#title' => 'CSS',
+      '#return_value' => '1',
+      '#default_value' => $setting->isCssMinifyEnabled() ? '1': '0',
+//      '#disabled' => !($setting->isEditable()),
+    ];
+
+    $html_checkbox = [
+      '#type' => 'checkbox',
+      '#title' => 'HTML',
+      '#return_value' => '1',
+      '#default_value' => '1',
+//      '#disabled' => !($setting->isEditable()),
+    ];
+    return ['css'=>$css_checkbox,'js'=>$js_checkbox,'html'=>$html_checkbox];
   }
 
 
-  private function renderZoneSettingMobileRedirect() {
+  private function renderZoneSettingMobileRedirect(ZoneSettingMobileRedirect $setting) {
+    $mobile_subdomain = $setting->getMobileSubdomain();
+    $is_mobile_redirect_enabled = $setting->isIsMobileRedirectEnabled();
+    $is_strip_uri_enabled = $setting->isIsStripUriEnabled();
 
+    $mobile_subdomain_textfield = [
+      '#type' => 'textfield',
+      '#title' => 'Mobile Subdomain',
+      '#default_value' => $mobile_subdomain,
+      '#size' => 20,
+      '#disabled' => !($setting->isEditable())
+    ];
+
+    $mobile_redirect_checkbox = [
+      '#type' => 'checkbox',
+      '#title' => 'Mobile Redirect',
+      '#default_value' => $is_mobile_redirect_enabled,
+      '#disabled' => !($setting->isEditable()),
+    ];
+
+    $strip_uri_checkbox = [
+      '#type' => 'checkbox',
+      '#title' => 'Strip URI',
+      '#default_value' => $is_strip_uri_enabled,
+      '#disabled' => !($setting->isEditable()),
+    ];
+
+    return [$mobile_subdomain_textfield, $mobile_redirect_checkbox, $strip_uri_checkbox];
   }
 
   private function renderZoneSettingSecurityHeader() {
@@ -271,7 +321,19 @@ class CloudFlareZoneSettingRenderer {
    *   settings.
    */
   private function renderZoneSettingSecurityLevel(ZoneSettingSecurityLevel $setting) {
+    $security_levels = ZoneSettingSecurityLevel::getSecurityLevels();
 
+    $assoc_security_levels = array_combine($security_levels, $security_levels);
+
+    $form_select_field = [
+      '#type' => 'select',
+      '#title' => t('Selected'),
+      '#options' => $assoc_security_levels,
+      '#default_value' => $setting->getValue(),
+      '#disabled' => !$setting->isEditable(),
+    ];
+
+    return [ZoneSettings::SETTING_SECURITY_LEVEL => $form_select_field];
   }
 
   /**
@@ -285,6 +347,19 @@ class CloudFlareZoneSettingRenderer {
    */
   private function renderZoneSettingSsl(ZoneSettingSsl $setting) {
 
+    $ssl_levels = ZoneSettingSsl::getSslLevels();
+
+    $assoc_ssl_levels = array_combine($ssl_levels, $ssl_levels);
+
+    $form_select_field = [
+      '#type' => 'select',
+      '#title' => t('Selected'),
+      '#options' => $assoc_ssl_levels,
+      '#default_value' => $setting->getValue(),
+      '#disabled' => !$setting->isEditable(),
+    ];
+
+    return [ZoneSettings::SETTING_SSL => $form_select_field];
   }
 
 }
