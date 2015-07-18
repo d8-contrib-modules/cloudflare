@@ -1,5 +1,7 @@
 ## Introduction
 Provides integration with the Cloudflare API see: https://api.cloudflare.com/
+[![Automated Build](https://travis-ci.org/adweingarten/cloudflare.svg?branch=master)](https://travis-ci.org/adweingarten/cloudflare)
+
 
 The module relies on the CloudFlarePHPSdk for all interactions with the 
 CloudFlare API.  You can check it out here:  https://github.com/aweingarten/cloudflarephpsdk
