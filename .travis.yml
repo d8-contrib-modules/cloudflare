@@ -1,0 +1,36 @@
+sudo: false
+language: php
+
+php:
+  - 5.5
+  - 5.6
+  - 7.0
+
+matrix:
+  allow_failures:
+    - php: 7.0
+  fast_finish: true
+
+cache:
+  bundler: true
+  apt: true
+  directories:
+    - $HOME/.composer/cache
+
+env:
+  - COMPOSER_BIN_DIR=$TRAVIS_BUILD_DIR/bin'
+
+before_install:
+  - composer selfupdate
+
+install:
+  # The project contains two composer.json files, one for the new project
+  # and one for the installer.
+  - composer install --no-interaction --prefer-source --dev
+  - export PATH=$PATH:$COMPOSER_BIN_DIR
+
+script:
+  # Run tests
+  - phing -f build/phing/build.xml run-tests
+
+
