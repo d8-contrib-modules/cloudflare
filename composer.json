@@ -1,6 +1,24 @@
 {
   "name": "drupal/cloudflare",
+  "type": "module",
+  "description": "Drupal module for interacting with CloudFlare's SDK. CloudFlare is a copyright of CloudFlare, Inc.  The authors of this tool has no association with CloudFlare, Inc.",
+  "keywords": ["Drupal, CloudFlare", "Cloud Flare"],
+  "homepage": "https://github.com/adweingarten/cloudflare",
+  "license": "GPL-2.0+",
   "require": {
     "aweingarten/cloudflarephpsdk": "dev-master"
+  },
+  "require-dev": {
+    "drupal/coder":                 "8.2.*",
+    "phploc/phploc":                "2.0.*@dev",
+    "sebastian/phpcpd":             "2.0.*@dev",
+    "phpunit/phpunit":              "4.6.*",
+    "squizlabs/php_codesniffer":    "2.*",
+    "pdepend/pdepend":              "1.1.*",
+    "phing/phing":                  "2.11.*",
+    "phpmd/phpmd":                  "1.*"
   }
 }
+
+
+
