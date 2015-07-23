@@ -106,16 +106,6 @@ class CloudFlareZoneSettingRenderer {
       $zone_id = $this->zones[0]->getZoneId();
     }
 
-    $zone = $this->zoneApi->getZoneSettings($zone_id);
-    $render_array = [];
-    foreach ($zone->getSettings() as $zone_setting) {
-      $setting_render = $this->renderSetting($zone_setting);
-
-      if (!is_null($setting_render)) {
-        $render_array[$zone_setting->getZoneSettingName()] = $setting_render;
-      }
-    }
-
     // Build the sortable table header.
     $header = [
       ZoneSettings::SETTING_WRAPPER_ID => t('Setting Name'),
@@ -127,9 +117,19 @@ class CloudFlareZoneSettingRenderer {
     $tableselect_settings = array(
       '#type' => 'table',
       '#header' => $header,
-      '#rows' => $render_array,
       '#multiple' => FALSE,
     );
+
+    $zone = $this->zoneApi->getZoneSettings($zone_id);
+
+    foreach ($zone->getSettings() as $zone_setting) {
+      $setting_render = $this->renderSetting($zone_setting);
+
+      if (!is_null($setting_render)) {
+        $tableselect_settings[$zone_setting->getZoneSettingName()] = $setting_render;
+      }
+    }
+
 
     return $tableselect_settings;
   }
@@ -145,7 +145,7 @@ class CloudFlareZoneSettingRenderer {
    */
   public function renderSetting(ZoneSettingBase $setting) {
     $current_type = get_class($setting);
-    $render_result = [];
+    $row = [];
 
     switch ($current_type) {
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBool':
@@ -177,26 +177,22 @@ class CloudFlareZoneSettingRenderer {
         break;
     }
 
-    if ($current_type != 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify') {
-      return;
-    }
-
-    $render_result[ZoneSettings::SETTING_WRAPPER_ID] = ['data' => [
+    $row[ZoneSettings::SETTING_WRAPPER_ID] = [
       '#markup' => $setting->getZoneSettingName()
-    ]];
+    ];
 
-    $render_result[ZoneSettings::SETTING_WRAPPER_VALUE] = ['data' => $value_render];
+    $row[ZoneSettings::SETTING_WRAPPER_VALUE] = [$value_render];
 
 
-    $render_result[ZoneSettings::SETTING_WRAPPER_EDITABLE] = ['data' => [
+    $row[ZoneSettings::SETTING_WRAPPER_EDITABLE] = [
       '#markup' => ($setting->isEditable() ? 'Yes' : 'No'),
-    ]];
+    ];
 
-    $render_result[ZoneSettings::SETTING_WRAPPER_MODIFIED_ON] = ['data' => [
+    $row[ZoneSettings::SETTING_WRAPPER_MODIFIED_ON] = [
       '#markup' => ($setting->getTimeModifiedOnServer() ? format_date($setting->getTimeModifiedOnServer()) : 'N/A'),
-    ]];
+    ];
 
-    return $render_result;
+    return $row;
   }
 
   /**
@@ -212,7 +208,7 @@ class CloudFlareZoneSettingRenderer {
     $setting = [
       '#type' => 'checkbox',
       '#default_value' => $setting->getValue(),
-//      '#disabled' => !($setting->isEditable()),
+      '#disabled' => !($setting->isEditable()),
     ];
 
     return $setting;
@@ -252,27 +248,26 @@ class CloudFlareZoneSettingRenderer {
     $js_checkbox = [
       '#type' => 'checkbox',
       '#title' => 'JS',
-      '#return_value' => '1',
-      '#default_value' => $setting->isJsMinifyEnabled() ? '1': '0',
-//      '#disabled' => !($setting->isEditable()),
+      '#default_value' => $setting->isJsMinifyEnabled() ? '1' : '0',
+      '#disabled' => !($setting->isEditable()),
     ];
 
     $css_checkbox = [
       '#type' => 'checkbox',
       '#title' => 'CSS',
-      '#return_value' => '1',
-      '#default_value' => $setting->isCssMinifyEnabled() ? '1': '0',
-//      '#disabled' => !($setting->isEditable()),
+      '#default_value' => $setting->isCssMinifyEnabled() ? '1' : '0',
+      '#disabled' => !($setting->isEditable()),
     ];
 
     $html_checkbox = [
       '#type' => 'checkbox',
       '#title' => 'HTML',
-      '#return_value' => '1',
-      '#default_value' => '1',
-//      '#disabled' => !($setting->isEditable()),
+      '#default_value' => $setting->isHtmlMinifyEnabled() ? '1' : '0',
+      '#disabled' => !($setting->isEditable()),
+
     ];
-    return ['css'=>$css_checkbox,'js'=>$js_checkbox,'html'=>$html_checkbox];
+
+    return [$css_checkbox , $js_checkbox, $html_checkbox];
   }
 
 
