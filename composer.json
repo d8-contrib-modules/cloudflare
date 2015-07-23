@@ -6,7 +6,7 @@
   "homepage": "https://github.com/adweingarten/cloudflare",
   "license": "GPL-2.0+",
   "require": {
-    "aweingarten/cloudflarephpsdk": "dev-master"
+    "adweingarten/cloudflarephpsdk": "dev-master"
   },
   "require-dev": {
     "drupal/coder":                 "8.2.*",

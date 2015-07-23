@@ -70,14 +70,6 @@ class CloudFlareZoneForm extends ConfigFormBase {
       return;
     }
 
-    // A checkbox is active when #default_value == #return_value.
-    $form['checkbox_on'] = array(
-      '#type' => 'checkbox',
-      '#return_value' => '1',
-      '#default_value' => '1',
-      '#title' => 'checkbox_on',
-    );
-    //unset($form_state);
     return parent::buildForm($form, $form_state);
   }
 
