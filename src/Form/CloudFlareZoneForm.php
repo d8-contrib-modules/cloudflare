@@ -58,14 +58,14 @@ class CloudFlareZoneForm extends ConfigFormBase {
     // If we were unable to get results back from the API attempt to provide
     // meaningful feedback to the user.
     catch (CloudFlareHttpException $e) {
-      drupal_set_message("Unable to connect to CloudFlare. ". $e->getMessage(),'error');
+      drupal_set_message("Unable to connect to CloudFlare. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       $form['zone']['#access'] = FALSE;
       return;
     }
 
     catch (CloudFlareApiException $e) {
-      drupal_set_message("Unable to connect to CloudFlare. ". $e->getMessage(),'error');
+      drupal_set_message("Unable to connect to CloudFlare. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
     }

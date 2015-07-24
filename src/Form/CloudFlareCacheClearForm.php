@@ -108,13 +108,11 @@ class CloudFlareCacheClearForm extends FormBase {
     $email = $config->get('email');
     $zone = $config->get('zone');
 
-
-
     try{
       $this->zoneApi = new ZoneApi($api_key, $email);
 
       // @todo rethink how to handle cloudflare zones in Drupal.
-      if(is_null($zone)){
+      if (is_null($zone)) {
         $zones = $this->zoneApi->listZones();
         $zone = $zones[0]->getZoneId();
       }
@@ -123,13 +121,13 @@ class CloudFlareCacheClearForm extends FormBase {
     }
 
     catch(CloudFlareHttpException $e) {
-      drupal_set_message("Unable to clear zone cache. ". $e->getMessage(),'error');
+      drupal_set_message("Unable to clear zone cache. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
     }
 
     catch(CloudFlareApiException $e) {
-      drupal_set_message("Unable to clear zone cache. ". $e->getMessage(),'error');
+      drupal_set_message("Unable to clear zone cache. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
     }
@@ -152,26 +150,25 @@ class CloudFlareCacheClearForm extends FormBase {
     $email = $config->get('email');
     $zone = $config->get('zone');
 
-    try{
+    try {
       $zone_api = new ZoneApi($api_key, $email);
 
       // @todo rethink how to handle cloudflare zones in Drupal.
-      if(is_null($zone)){
+      if (is_null($zone)) {
         $zones = $zone_api->listZones();
         $zone = $zones[0]->getZoneId();
       }
       $zone_api->purgeAllFiles($zone);
     }
 
-
-    catch(CloudFlareHttpException $e) {
-      drupal_set_message("Unable to clear paths. ". $e->getMessage(),'error');
+    catch (CloudFlareHttpException $e) {
+      drupal_set_message("Unable to clear paths. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
     }
 
-    catch(CloudFlareApiException $e) {
-      drupal_set_message("Unable to clear paths. ". $e->getMessage(),'error');
+    catch (CloudFlareApiException $e) {
+      drupal_set_message("Unable to clear paths. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
     }
@@ -180,7 +177,11 @@ class CloudFlareCacheClearForm extends FormBase {
     drupal_set_message("The zone: $zone was successfully cleared.");
   }
 
-  //@todo figure out how to replace formbase so that this is not necessary.
+  // @todo figure out how to replace formbase so that this is not necessary.
+
+  /**
+   * {@inheritdoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
   }
 
