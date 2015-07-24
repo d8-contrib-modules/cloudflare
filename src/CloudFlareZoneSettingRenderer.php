@@ -130,7 +130,6 @@ class CloudFlareZoneSettingRenderer {
       }
     }
 
-
     return $tableselect_settings;
   }
 
@@ -182,7 +181,6 @@ class CloudFlareZoneSettingRenderer {
     ];
 
     $row[ZoneSettings::SETTING_WRAPPER_VALUE] = [$value_render];
-
 
     $row[ZoneSettings::SETTING_WRAPPER_EDITABLE] = [
       '#markup' => ($setting->isEditable() ? 'Yes' : 'No'),
@@ -270,7 +268,15 @@ class CloudFlareZoneSettingRenderer {
     return [$css_checkbox , $js_checkbox, $html_checkbox];
   }
 
-
+  /**
+   * Builds MobileRedirect settings.
+   *
+   * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect $setting
+   *   The settings to render
+   *
+   * @return array
+   *   FormApi render array representation of ZoneSettingMobileRedirect
+   */
   private function renderZoneSettingMobileRedirect(ZoneSettingMobileRedirect $setting) {
     $mobile_subdomain = $setting->getMobileSubdomain();
     $is_mobile_redirect_enabled = $setting->isIsMobileRedirectEnabled();
@@ -301,8 +307,18 @@ class CloudFlareZoneSettingRenderer {
     return [$mobile_subdomain_textfield, $mobile_redirect_checkbox, $strip_uri_checkbox];
   }
 
-  private function renderZoneSettingSecurityHeader() {
-
+  /**
+   * Builds MobileRedirect settings.
+   *
+   * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityHeader $setting
+   *   The settings to render
+   *
+   * @return array
+   *   FormApi render array representation of ZoneSettingSecurityHeader
+   */
+  private function renderZoneSettingSecurityHeader(ZoneSettingSecurityHeader $setting) {
+    $form = [];
+    return $form;
   }
 
   /**
