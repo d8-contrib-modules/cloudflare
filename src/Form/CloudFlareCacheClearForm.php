@@ -108,7 +108,7 @@ class CloudFlareCacheClearForm extends FormBase {
     $email = $config->get('email');
     $zone = $config->get('zone');
 
-    try{
+    try {
       $this->zoneApi = new ZoneApi($api_key, $email);
 
       // @todo rethink how to handle cloudflare zones in Drupal.
@@ -120,13 +120,13 @@ class CloudFlareCacheClearForm extends FormBase {
       $this->zoneApi->purgeAllFiles($zone);
     }
 
-    catch(CloudFlareHttpException $e) {
+    catch (CloudFlareHttpException $e) {
       drupal_set_message("Unable to clear zone cache. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
     }
 
-    catch(CloudFlareApiException $e) {
+    catch (CloudFlareApiException $e) {
       drupal_set_message("Unable to clear zone cache. " . $e->getMessage(), 'error');
       \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
@@ -177,12 +177,11 @@ class CloudFlareCacheClearForm extends FormBase {
     drupal_set_message("The zone: $zone was successfully cleared.");
   }
 
-  // @todo figure out how to replace formbase so that this is not necessary.
-
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    // @todo figure out how to replace formbase so that this is not necessary.
   }
 
 }
