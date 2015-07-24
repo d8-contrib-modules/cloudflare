@@ -41,6 +41,7 @@ class CloudFlareZoneSettingRenderer {
 
   /**
    * Builds a form render array for zone selection.
+   *
    * @return array
    *   Form Api Render array for zone select.
    */
@@ -63,7 +64,7 @@ class CloudFlareZoneSettingRenderer {
     }
     // If we were unable to get results back from the API attempt to provide
     // meaningful feedback to the user.
-    catch (CloudFlareHttpException $e){
+    catch (CloudFlareHttpException $e) {
       $form_select_field['zone_api_exception'] = [
         '#type' => 'text',
         '#title' => $this->t($e->getMessage()),
@@ -197,7 +198,7 @@ class CloudFlareZoneSettingRenderer {
    * Builds FormApi radio button for the value of a ZoneSettingBool.
    *
    * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBool $setting
-   *   The settings to render
+   *   The settings to render.
    *
    * @return array
    *   FormApi render array containing radio buttons.
@@ -216,7 +217,7 @@ class CloudFlareZoneSettingRenderer {
    * Builds FormApi TextField for the value of a ZoneSettingInt.
    *
    * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingInt $setting
-   *   The settings to render
+   *   The settings to render.
    *
    * @return array
    *   FormApi render array containing text field.
@@ -236,7 +237,7 @@ class CloudFlareZoneSettingRenderer {
    * Builds FormApi radio button for the value of a ZoneSettingMinify.
    *
    * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify $setting
-   *   The settings to render
+   *   The settings to render.
    *
    * @return array
    *   FormApi render array containing radio button sets for js/css/html minify
@@ -272,7 +273,7 @@ class CloudFlareZoneSettingRenderer {
    * Builds MobileRedirect settings.
    *
    * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect $setting
-   *   The settings to render
+   *   The settings to render.
    *
    * @return array
    *   FormApi render array representation of ZoneSettingMobileRedirect
@@ -311,7 +312,7 @@ class CloudFlareZoneSettingRenderer {
    * Builds MobileRedirect settings.
    *
    * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityHeader $setting
-   *   The settings to render
+   *   The settings to render.
    *
    * @return array
    *   FormApi render array representation of ZoneSettingSecurityHeader
