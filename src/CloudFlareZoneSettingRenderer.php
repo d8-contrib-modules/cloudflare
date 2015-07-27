@@ -12,8 +12,7 @@ use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityHeader;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityLevel;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSsl;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSelectBase;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBase;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
@@ -152,8 +151,12 @@ class CloudFlareZoneSettingRenderer {
         $value_render = $this->renderZoneSettingBool($setting);
         break;
 
-      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingInt':
-        $value_render = $this->renderZoneSettingInt($setting);
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBrowserCacheTtl':
+        $value_render = $this->renderZoneSettingSelectBase($setting);
+        break;
+
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingChallengeTtl':
+        $value_render = $this->renderZoneSettingSelectBase($setting);
         break;
 
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify':
@@ -169,11 +172,11 @@ class CloudFlareZoneSettingRenderer {
         break;
 
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityLevel':
-        $value_render = $this->renderZoneSettingSecurityLevel($setting);
+        $value_render = $this->renderZoneSettingSelectBase($setting);
         break;
 
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSsl':
-        $value_render = $this->renderZoneSettingSsl($setting);
+        $value_render = $this->renderZoneSettingSelectBase($setting);
         break;
     }
 
@@ -266,7 +269,11 @@ class CloudFlareZoneSettingRenderer {
 
     ];
 
-    return [$css_checkbox , $js_checkbox, $html_checkbox];
+    return [
+      ZoneSettings::SETTING_MINIFY_CSS => $css_checkbox,
+      ZoneSettings::SETTING_MINIFY_JS => $js_checkbox,
+      ZoneSettings::SETTING_MINIFY_HTML => $html_checkbox
+    ];
   }
 
   /**
@@ -323,55 +330,27 @@ class CloudFlareZoneSettingRenderer {
   }
 
   /**
-   * Builds FormApi select for the value of a ZoneSettingSecurityLevel.
+   * Builds FormApi select for the value of a ZoneSettingSelectBase.
    *
-   * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityLevel $setting
+   * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSelectBase $setting
    *   The settings to render.
    *
    * @return array
-   *   FormApi render array containing select for ZoneSettingSecurityLevel
-   *   settings.
+   *   FormApi render array containing select for settings.
    */
-  private function renderZoneSettingSecurityLevel(ZoneSettingSecurityLevel $setting) {
-    $security_levels = ZoneSettingSecurityLevel::getSecurityLevels();
-
-    $assoc_security_levels = array_combine($security_levels, $security_levels);
+  private function renderZoneSettingSelectBase(ZoneSettingSelectBase $setting) {
+    $select_options = $setting->validValues();
+    $assoc_select_options = array_combine($select_options, $select_options);
 
     $form_select_field = [
       '#type' => 'select',
       '#title' => t('Selected'),
-      '#options' => $assoc_security_levels,
+      '#options' => $assoc_select_options,
       '#default_value' => $setting->getValue(),
       '#disabled' => !$setting->isEditable(),
     ];
 
-    return [ZoneSettings::SETTING_SECURITY_LEVEL => $form_select_field];
-  }
-
-  /**
-   * Builds FormApi select for the value of a ZoneSettingSsl.
-   *
-   * @param \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSsl $setting
-   *   The settings to render.
-   *
-   * @return array
-   *   FormApi render array containing select for ZoneSettingSsl settings.
-   */
-  private function renderZoneSettingSsl(ZoneSettingSsl $setting) {
-
-    $ssl_levels = ZoneSettingSsl::getSslLevels();
-
-    $assoc_ssl_levels = array_combine($ssl_levels, $ssl_levels);
-
-    $form_select_field = [
-      '#type' => 'select',
-      '#title' => t('Selected'),
-      '#options' => $assoc_ssl_levels,
-      '#default_value' => $setting->getValue(),
-      '#disabled' => !$setting->isEditable(),
-    ];
-
-    return [ZoneSettings::SETTING_SSL => $form_select_field];
+    return [$setting->getZoneSettingName() => $form_select_field];
   }
 
 }
