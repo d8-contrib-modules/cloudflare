@@ -13,7 +13,6 @@ use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use foo\bar\Exception;
 
 
 /**

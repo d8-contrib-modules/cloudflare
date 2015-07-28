@@ -5,15 +5,7 @@
  * Contains Drupal\cloudflare\CloudFlareSettingRenderer.
  */
 
-namespace Drupal\cloudflare;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBool;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingInt;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityHeader;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSelectBase;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBase;
+namespace Drupal\cloudflare\Form;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
@@ -152,10 +144,9 @@ class CloudFlareZoneSettingRenderer {
         break;
 
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBrowserCacheTtl':
-        $value_render = $this->renderZoneSettingSelectBase($setting);
-        break;
-
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingChallengeTtl':
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityLevel':
+      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSsl':
         $value_render = $this->renderZoneSettingSelectBase($setting);
         break;
 
@@ -169,14 +160,6 @@ class CloudFlareZoneSettingRenderer {
 
       case 'ZoneSettingSecurityHeader':
         $value_render = $this->renderZoneSettingSecurityHeader($setting);
-        break;
-
-      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityLevel':
-        $value_render = $this->renderZoneSettingSelectBase($setting);
-        break;
-
-      case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSsl':
-        $value_render = $this->renderZoneSettingSelectBase($setting);
         break;
     }
 
