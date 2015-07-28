@@ -14,7 +14,6 @@ use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\cloudflare\CloudFlareZoneSettingRenderer;
 
 
 /**
@@ -100,6 +99,7 @@ class CloudFlareZoneForm extends ConfigFormBase {
       $current_setting = $zone_settings->getSettingById($setting_name);
       $is_boolean = in_array($setting_name, ZoneSettings::getBooleanSettings());
       $is_integer = in_array($setting_name, ZoneSettings::getIntegerSettings());
+      $is_select = in_array($setting_name, ZoneSettings::getSelectSettings());
 
       // If the setting is not editable then there is nothing to change on the
       // API.
@@ -117,6 +117,14 @@ class CloudFlareZoneForm extends ConfigFormBase {
 
       elseif ($is_integer) {
         $new_value = $value_wrapper['value'][0];
+        $value_changed = $new_value != $current_setting->getValue();
+        if ($value_changed) {
+          $current_setting->setValue($new_value);
+        }
+      }
+
+      elseif ($is_select) {
+        $new_value = $value_wrapper['value'][0][$setting_name];
         $value_changed = $new_value != $current_setting->getValue();
         if ($value_changed) {
           $current_setting->setValue($new_value);
@@ -153,18 +161,6 @@ class CloudFlareZoneForm extends ConfigFormBase {
           // @todo this has not been wired up yet.
           case ZoneSettings::SETTING_SECURITY_HEADER:
             break;
-
-          case ZoneSettings::SETTING_BROWSER_CACHE_TTL:
-          case ZoneSettings::SETTING_CHALLENGE_TTL:
-          case ZoneSettings::SETTING_SECURITY_LEVEL:
-          case ZoneSettings::SETTING_SSL:
-            $new_value = $value_wrapper['value'][0][$setting_name];
-            $value_changed = $new_value != $current_setting->getValue();
-            if ($value_changed) {
-              $current_setting->setValue($new_value);
-            }
-            break;
-
         }
       }
     }
