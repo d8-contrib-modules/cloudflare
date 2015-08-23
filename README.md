@@ -1,8 +1,8 @@
 ## Introduction
 Provides integration with the Cloudflare API see: https://api.cloudflare.com/
 
-[![Automated Build](https://travis-ci.org/adweingarten/cloudflare.svg?branch=master)](https://travis-ci.org/adweingarten/cloudflare)
-[![License](https://poser.pugx.org/adweingarten/cloudflare/license)](https://packagist.org/packages/phpunit/phpunit)
+[![Automated Build](https://travis-ci.org/d8-contrib-modules/cloudflare.svg?branch=master)](https://travis-ci.org/d8-contrib-modules/cloudflare)
+[![License](https://poser.pugx.org/d8-contrib-modules/cloudflare/license)](https://packagist.org/packages/phpunit/phpunit)
 
 The module relies on the CloudFlarePHPSdk for all interactions with the 
 CloudFlare API.  You can check it out here:  https://github.com/aweingarten/cloudflarephpsdk
