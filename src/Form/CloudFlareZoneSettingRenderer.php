@@ -7,6 +7,7 @@
 
 namespace Drupal\cloudflare\Form;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
 use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
 
