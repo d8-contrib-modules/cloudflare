@@ -8,6 +8,14 @@
 namespace Drupal\cloudflare\Form;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBase;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBool;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityHeader;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSelectBase;
+use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
+use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
 
