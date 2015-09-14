@@ -1,0 +1,13 @@
+parameters:
+  cloudflare.cache_tag_header_limit: 255
+
+services:
+  cloudflare.cache_tags.invalidator:
+    class: Drupal\cloudflare\CacheTagsInvalidator
+    tags:
+      - { name: cache_tags_invalidator}
+  cloudflare.cache_tags.surrogate_key_generator:
+    class: Drupal\cloudflare\EventSubscriber\CloudFlareCacheTagHeaderGenerator
+    arguments: ['%cloudflare.cache_tag_header_limit%']
+    tags:
+      - { name: event_subscriber }
