@@ -3,7 +3,7 @@ cloudflare.admin_settings_form:
   parent: system.admin_config_development
   defaults:
     _form: '\Drupal\cloudflare\Form\CloudFlareAdminSettingsForm'
-    _title: 'CloudFlare Api Credentials'
+    _title: 'CloudFlare API Credentials'
   requirements:
     _permission: 'access administration pages'
 

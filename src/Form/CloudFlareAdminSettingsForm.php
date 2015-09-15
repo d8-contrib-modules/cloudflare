@@ -39,7 +39,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form['api_credentials_fieldset'] = [
       '#type' => 'fieldset',
-      '#title' => t('Api Credentials'),
+      '#title' => $this->t('API Credentials'),
     ];
 
     $config = $this->config('cloudflare.settings');
@@ -47,14 +47,13 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
     $form['api_credentials_fieldset']['apikey'] = [
       '#type' => 'textfield',
       '#title' => $this->t('CloudFlare API Key'),
-      '#description' => $this->t('Your Api key.  Login to cloudflare here to get it.'),
+      '#description' => $this->t('Your API key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
       '#default_value' => $config->get('apikey'),
       '#required' => TRUE
     ];
     $form['api_credentials_fieldset']['email'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Account Email Address'),
-      '#description' => $this->t('Email '),
+      '#title' => $this->t('Account e-mail address'),
       '#default_value' => $config->get('email'),
     ];
 
@@ -69,7 +68,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
     $is_email_valid = \Drupal::service('email.validator')->isValid($email);
 
     if (!$is_email_valid) {
-      $form_state->setErrorByName('email', $this->t('Invalid Email Address.  Please enter a valid email address.'));
+      $form_state->setErrorByName('email', $this->t('Please enter a valid e-mail address.'));
     }
 
     parent::validateForm($form, $form_state);
