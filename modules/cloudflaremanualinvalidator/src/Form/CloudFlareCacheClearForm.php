@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Contains Drupal\cloudflare\Form\DefaultForm.
+ * Contains Drupal\cloudflaremanualinvalidator\Form\CloudFlareCacheClearForm.
  */
 
-namespace Drupal\cloudflare\Form;
+namespace Drupal\cloudflaremanualinvalidator\Form;
 
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
