@@ -16,15 +16,6 @@ cloudflare.zone_form:
   requirements:
     _permission: 'access administration pages'
 
-cloudflare.cache_clear_form:
-  path: '/admin/config/development/cloudflare/cache-clear'
-  parent: system.admin_config_development.cloudflare.admin_settings_form
-  defaults:
-    _form: '\Drupal\cloudflare\Form\CloudFlareCacheClearForm'
-    _title: 'CloudFlare Cache Clear'
-  requirements:
-    _permission: 'access administration pages'
-
 
 
 

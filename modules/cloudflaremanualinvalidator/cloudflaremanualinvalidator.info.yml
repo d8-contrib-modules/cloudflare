@@ -1,0 +1,11 @@
+name: CloudFlareManualInvalidator
+type: module
+description: Allows manual cache clears of cloudflare.
+core: 8.x
+package: Web services
+configure: cloudflare.admin_settings_form
+
+dependencies:
+  - composer_manager
+  - cloudflare
+
