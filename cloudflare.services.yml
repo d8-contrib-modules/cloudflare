@@ -7,3 +7,16 @@ services:
     arguments: ['%cloudflare.cache_tag_header_limit%']
     tags:
       - { name: event_subscriber }
+  cloudflare.config:
+    class: Drupal\cloudflare\Config
+    arguments: ['@config.factory', '@logger.channel.cloudflare']
+    tags:
+      - { name: cloudflare}
+  cloudflare.zone:
+    class: Drupal\cloudflare\Zone
+    arguments: ['@cloudflare.config']
+    tags:
+      - { name: cloudflare}
+  logger.channel.cloudflare:
+    parent: logger.channel_base
+    arguments: ['cloudflare']
