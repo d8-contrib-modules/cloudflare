@@ -8,13 +8,9 @@ The module relies on the CloudFlarePHPSdk for all interactions with the
 CloudFlare API.  You can check it out here:  https://github.com/aweingarten/cloudflarephpsdk
 
 ## Installation
-- If you don't already have it download and install the Composer Manager module 
-  from D.O.
-- Initialize it using the init.sh script (or drush composer-manager-init).
-  This registers the module's Composer command for Drupal core.
 - Install the CloudFlare module.
-- Inside your core/ directory run composer drupal-update.
-    This rebuilds core/composer.json and downloads the new module's requirements.
+- At the root of your Drupal site, run `composer drupal-update`.
+    This rebuilds `core/composer.json` and downloads the CloudFlare module's requirements: it downloads the CloudFlarePHPSdk.
 
 
 ## Usage
