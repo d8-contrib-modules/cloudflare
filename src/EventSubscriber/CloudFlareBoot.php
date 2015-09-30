@@ -7,12 +7,12 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Cache\Cache;
 
+define('CLOUDFLARE_URL_IPV4_RANGE', 'https://www.cloudflare.com/ips-v4');
+
 /**
  * Provides a CloudFlareBoot.
  */
 class CloudFlareBoot implements EventSubscriberInterface {
-
-
   /**
    * {@inheritdoc}
    */
@@ -73,7 +73,7 @@ class CloudFlareBoot implements EventSubscriberInterface {
       return $cache->data;
     }
     else {
-      $ip_blocks = file_get_contents("https://www.cloudflare.com/ips-v4");
+      $ip_blocks = file_get_contents(CLOUDFLARE_URL_IPV4_RANGE);
       $cloudflare_ips = explode("\n", $ip_blocks);
       $cloudflare_ips = array_map('trim', $cloudflare_ips);
 
