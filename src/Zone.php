@@ -6,92 +6,139 @@
  */
 
 namespace Drupal\cloudflare;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
-use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
-use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
+use CloudFlarePhpSdk\Exceptions\CloudFlareException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Zone methods for CloudFlare.
  */
-class Zone implements CloudflareZoneInterface {
-  /*
-   * @var \Drupal\cloudflare\Config
+class Zone implements CloudFlareZoneInterface {
+  use StringTranslationTrait;
+
+  /**
+   * The settings configuration.
+   *
+   * @var \Drupal\Core\Config\Config
    */
   protected $config;
 
-  /*
+  /**
+   * A logger instance.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * Tracks rate limits associated with CloudFlare Api.
+   *
+   * @var \Drupal\cloudflare\CloudFlareStateInterface
+   */
+  protected $state;
+
+  /**
+   * ZoneApi object for interfacing with CloudFlare Php Sdk.
+   *
    * @var \CloudFlarePhpSdk\ApiEndpoints\ZoneApi
    */
   protected $zoneApi;
 
-  /*
+  /**
+   * The current cloudflare ZoneId.
+   *
    * @var string
    */
   protected $zone;
 
   /**
+   * Flag for valid credentials.
+   *
+   * @var bool
+   */
+  protected $validCredentials;
+
+  /**
    * Zone constructor.
    *
-   * @param \Drupal\cloudflare\Config $config
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   CloudFlare config object.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger instance.
+   * @param \Drupal\cloudflare\CloudFlareStateInterface $state
+   *   Tracks rate limits associated with CloudFlare Api.
    */
-  public function __construct(Config $config) {
-    $this->config = $config;
-    $this->zoneApi = $config->getZoneApi();
+  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state) {
+    $this->config = $config->get('cloudflare.settings');
+    $this->logger = $logger;
+    $this->state = $state;
 
-    if ($this->config->hasValidApiCredentials()) {
-      $this->zone = $this->config->getCurrentZoneId();
-    }
+    $api_key = $this->config->get('apikey');
+    $email = $this->config->get('email');
+    $this->zone = $this->config->get('zone');
+
+    $this->zoneApi = new ZoneApi($api_key, $email);
+    $this->validCredentials = $this->config->get('valid_credentials');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getZoneSettings() {
-    if (!$this->config->hasValidApiCredentials()) {
+    if (!$this->validCredentials) {
       return NULL;
     }
 
     try {
-      return $this->zoneApi->getZoneSettings($this->zone);
+      $settings = $this->zoneApi->getZoneSettings($this->zone);
+      $this->state->incrementApiRateCount();
+
+      return $settings;
     }
 
-    catch (CloudFlareHttpException $e) {
-      drupal_set_message(t('Unable to get zone settings.') . $e->getMessage(), 'error');
-      $this->config->getLogger()->error($e->getMessage());
-      return NULL;
-    }
-
-    catch (CloudFlareApiException $e) {
-      drupal_set_message(t('Unable to get zone settings.') . $e->getMessage(), 'error');
-      $this->config->getLogger()->error($e->getMessage());
-      return NULL;
+    catch (CloudFlareException $e) {
+      $this->logger->error($e->getMessage());
+      throw $e;
     }
   }
 
   /**
    * {@inheritdoc}
    */
-  public function updateZone(ZoneSettings $zone_settings) {
-    if (!$this->config->hasValidApiCredentials()) {
+  public function updateZoneSettings(ZoneSettings $zone_settings) {
+    if (!$this->validCredentials) {
       return;
     }
 
     try {
       $this->zoneApi->updateZone($zone_settings);
+      $this->state->incrementApiRateCount();
     }
 
-    catch (CloudFlareHttpException $e) {
-      drupal_set_message(t('Unable to update zone settings.') . $e->getMessage(), 'error');
-      $this->config->getLogger()->error($e->getMessage());
-      return;
+    catch (CloudFlareException $e) {
+      $this->logger->error($e->getMessage());
+      throw $e;
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function listZones() {
+    $zones = [];
+    try {
+      $zones = $this->zoneApi->listZones();
+      $this->state->incrementApiRateCount();
     }
 
-    catch (CloudFlareApiException $e) {
-      drupal_set_message(t('Unable to update zone settings.') . $e->getMessage(), 'error');
-      $this->config->getLogger()->error($e->getMessage());
-      return;
+    catch (CloudFlareException $e) {
+      $this->logger->error($e->getMessage());
+      throw $e;
     }
+    return $zones;
   }
 
 }

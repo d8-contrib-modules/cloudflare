@@ -30,7 +30,7 @@ function address_requirements($phase) {
   $requirements = [];
   if ($phase == 'install') {
     if (!class_exists('\CloudFlarePhpSdk\ApiEndpoints\ZoneApi')) {
-      $requirements['cloudflate_library'] = [
+      $requirements['cloudflare_library'] = [
         'description' => t('Address requires the d8-contrib-modules/cloudflarephpsdk library.'),
         'severity' => REQUIREMENT_ERROR,
       ];

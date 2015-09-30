@@ -2,9 +2,3 @@ cloudflare.admin_settings_form:
   title: 'API Credentials'
   route_name: cloudflare.admin_settings_form
   base_route: cloudflare.admin_settings_form
-
-cloudflare.admin_settings_form.admin_zone:
-  title: 'Zone Settings'
-  route_name: cloudflare.zone_form
-  base_route: cloudflare.admin_settings_form
-

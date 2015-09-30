@@ -2,20 +2,88 @@
 
 /**
  * @file
- * Contains Drupal\cloudflare\Form\DefaultForm.
+ * Contains Drupal\cloudflare\Form\CloudFlareAdminSettingsForm.
  */
 
 namespace Drupal\cloudflare\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\cloudflare\CloudFlareZoneInterface;
+use Egulias\EmailValidator\EmailValidator;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use CloudFlarePhpSdk\Exceptions\CloudFlareException;
+
 
 /**
- * Class DefaultForm.
+ * Class CloudFlareAdminSettingsForm.
  *
  * @package Drupal\cloudflare\Form
  */
-class CloudFlareAdminSettingsForm extends ConfigFormBase {
+class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInjectionInterface {
+
+  /**
+   * Email validator class.
+   *
+   * @var \Egulias\EmailValidator\EmailValidator
+   */
+  protected $emailValidator;
+
+  /**
+   * Wrapper to access the CloudFlare zone api.
+   *
+   * @var \Drupal\cloudflare\CloudFlareZoneInterface
+   */
+  protected $zoneApi;
+
+  /**
+   * The cloudflare settings configuration.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
+   * A logger instance for cloudflare.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * Constructs a new CloudFlareAdminSettingsForm.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   *   The factory for configuration objects.
+   * @param \Drupal\cloudflare\CloudFlareZoneInterface $zone_api
+   *   The email validator.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger instance.
+   * @param \Egulias\EmailValidator\EmailValidator $email_validator
+   *   The email validator.
+   */
+  public function __construct(ConfigFactoryInterface $config, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, EmailValidator $email_validator) {
+    $this->config = $config->getEditable('cloudflare.settings');
+    $this->zoneApi = $zone_api;
+    $this->logger = $logger;
+    $this->emailValidator = $email_validator;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('cloudflare.zone'),
+      $container->get('logger.factory')->get('cloudflare'),
+      new EmailValidator()
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -42,19 +110,17 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
       '#title' => $this->t('API Credentials'),
     ];
 
-    $config = $this->config('cloudflare.settings');
-
     $form['api_credentials_fieldset']['apikey'] = [
       '#type' => 'textfield',
       '#title' => $this->t('CloudFlare API Key'),
       '#description' => $this->t('Your API key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
-      '#default_value' => $config->get('apikey'),
+      '#default_value' => $this->config->get('apikey'),
       '#required' => TRUE,
     ];
     $form['api_credentials_fieldset']['email'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Account e-mail address'),
-      '#default_value' => $config->get('email'),
+      '#default_value' => $this->config->get('email'),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -65,7 +131,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $email = $form_state->getValue('email');
-    $is_email_valid = \Drupal::service('email.validator')->isValid($email);
+    $is_email_valid = $this->emailValidator->isValid($email);
 
     if (!$is_email_valid) {
       $form_state->setErrorByName('email', $this->t('Please enter a valid e-mail address.'));
@@ -80,10 +146,58 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    $this->config('cloudflare.settings')
-      ->set('apikey', $form_state->getValue('apikey'))
-      ->set('email', $form_state->getValue('email'))
-      ->save();
+    // Attempt to interpolate the current zone.
+    $zone_id = $this->getZoneId();
+
+    if ($zone_id) {
+      $this->config->set('apikey', $form_state->getValue('apikey'))
+        ->set('email', $form_state->getValue('email'))
+        ->set('zone', $zone_id)
+        ->set('valid_credentials', TRUE)
+        ->save();
+    }
+
+    else {
+      $this->config->set('apikey', $form_state->getValue('apikey'))
+        ->set('email', $form_state->getValue('email'))
+        ->save();
+    }
+
+  }
+
+  /**
+   * Attempts to determine the current cloudflare zone id.
+   *
+   * @return string|NULL
+   *   A CloudFlare zone Id.
+   */
+  public function getZoneId() {
+    // If there is no zone set and the account only has a single zone.
+    try {
+      $zones_from_api = $this->zoneApi->listZones();
+    }
+
+    catch (CloudFlareException $e) {
+      $this->logger->error($e->getMessage());
+      return NULL;
+    }
+
+    $num_zones_from_api = count($zones_from_api);
+    $is_single_zone_cloudflare_account = $num_zones_from_api == 1;
+    if ($is_single_zone_cloudflare_account) {
+      // If there is a default zone return it so we can set it in CMI.
+      $zone_id = $zones_from_api[0]->getZoneId();
+      return $zone_id;
+    }
+
+    // If the zone has multiple accounts and none is specified in CMI we cannot
+    // move forward.
+    if (!$is_single_zone_cloudflare_account) {
+      $link_to_settings = Url::fromRoute('cloudflare.admin_settings_form')->toString();
+      $message = $this->t('No default zone has been entered for CloudFlare. Please go <a href="@link_to_settings">here</a> to set.', ['@link_to_settings' => $link_to_settings]);
+      $this->logger->error($message);
+      return NULL;
+    }
   }
 
 }

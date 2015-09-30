@@ -1,0 +1,9 @@
+parameters:
+  cloudflarepurger.cache_tag_header_limit: 255
+
+services:
+  cloudflarepurger.cache_tags.surrogate_key_generator:
+    class: Drupal\cloudflarepurger\EventSubscriber\CloudFlareCacheTagHeaderGenerator
+    arguments: ['%cloudflarepurger.cache_tag_header_limit%']
+    tags:
+      - { name: event_subscriber }
