@@ -35,7 +35,7 @@ be built out in both the D8.
 
 The module has a 3-tiered architecture
 1. CloudFlare API
-1. CloudFlare PHPSdk  (The SDK is imported using Composer Manager.)
+1. CloudFlare PHPSdk  (The SDK is imported using Composer.)
 1. CloudFlare Drupal 8 Module
 
 Keep in mind contributions will likely need to be made to both the Drupal 

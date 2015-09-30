@@ -1,20 +1,12 @@
-parameters:
-  cloudflare.cache_tag_header_limit: 255
-
 services:
-  cloudflare.cache_tags.surrogate_key_generator:
-    class: Drupal\cloudflare\EventSubscriber\CloudFlareCacheTagHeaderGenerator
-    arguments: ['%cloudflare.cache_tag_header_limit%']
-    tags:
-      - { name: event_subscriber }
-  cloudflare.config:
-    class: Drupal\cloudflare\Config
-    arguments: ['@config.factory', '@logger.channel.cloudflare']
+  cloudflare.state:
+    class: Drupal\cloudflare\State
+    arguments: ['@state']
     tags:
       - { name: cloudflare}
   cloudflare.zone:
     class: Drupal\cloudflare\Zone
-    arguments: ['@cloudflare.config']
+    arguments: ['@config.factory', '@logger.channel.cloudflare', '@cloudflare.state']
     tags:
       - { name: cloudflare}
   logger.channel.cloudflare:

@@ -2,23 +2,80 @@
 
 /**
  * @file
- * Contains Drupal\cloudflare\Form\DefaultForm.
+ * Contains Drupal\cloudflare_zone_ui\Form\CloudFlareZoneForm.
  */
 
-namespace Drupal\cloudflare\Form;
+namespace Drupal\cloudflare_zone_ui\Form;
 
-use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
-use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-
+use Drupal\cloudflare\CloudFlareZoneInterface;
+use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
+use CloudFlarePhpSdk\Exceptions\CloudFlareException;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Class DefaultForm.
- *
- * @package Drupal\cloudflare\Form
+ * Class CloudFlareZoneForm.
  */
 class CloudFlareZoneForm extends ConfigFormBase {
+
+  /**
+   * CloudFlare Zone Api interface.
+   *
+   * @var \Drupal\cloudflare\CloudFlareZoneInterface
+   */
+  protected $zoneApi;
+
+  /**
+   * The settings configuration.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
+   * Config Factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * A logger instance.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * Constructs a new CloudFlareZoneForm.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   *   The factory for configuration objects.
+   * @param \Drupal\cloudflare\CloudFlareZoneInterface $zone_api
+   *   The email validator.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger instance.
+   */
+  public function __construct(ConfigFactoryInterface $config, CloudFlareZoneInterface $zone_api, LoggerInterface $logger) {
+    $this->configFactory = $config;
+    $this->config = $config->get('cloudflare.settings');
+    $this->zoneApi = $zone_api;
+    $this->logger = $logger;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('cloudflare.zone'),
+      $container->get('logger.factory')->get('cloudflare')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -40,15 +97,14 @@ class CloudFlareZoneForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $this->config = \Drupal::config('cloudflare.settings');
 
     $form['zone'] = [
       '#type' => 'fieldset',
-      '#title' => t('Zone Settings'),
+      '#title' => $this->t('Zone Settings'),
     ];
 
     try {
-      $cloudflare_renderer = new CloudFlareZoneSettingRenderer();
+      $cloudflare_renderer = new CloudFlareZoneSettingRenderer($this->configFactory, $this->zoneApi, $this->logger);
       $form['zone']['selected'] = $cloudflare_renderer->buildZoneListing();
       $zone_render = $cloudflare_renderer->renderZoneSettings();
       $form['zone']['table'] = $zone_render;
@@ -56,16 +112,9 @@ class CloudFlareZoneForm extends ConfigFormBase {
 
     // If we were unable to get results back from the API attempt to provide
     // meaningful feedback to the user.
-    catch (CloudFlareHttpException $e) {
+    catch (CloudFlareException $e) {
       drupal_set_message("Unable to connect to CloudFlare. " . $e->getMessage(), 'error');
-      \Drupal::logger('cloudflare')->error($e->getMessage());
       $form['zone']['#access'] = FALSE;
-      return;
-    }
-
-    catch (CloudFlareApiException $e) {
-      drupal_set_message("Unable to connect to CloudFlare. " . $e->getMessage(), 'error');
-      \Drupal::logger('cloudflare')->error($e->getMessage());
       return;
     }
 
@@ -88,7 +137,7 @@ class CloudFlareZoneForm extends ConfigFormBase {
 
     // @todo.  Might be worth saving this in the form_state so we don't need
     // to load this 2x.
-    $zone_settings = \Drupal::service('cloudflare.zone')->getZoneSettings();
+    $zone_settings = $this->zoneApi->getZoneSettings();
 
     foreach ($form_user_input as $setting_name => $value_wrapper) {
       $current_setting = $zone_settings->getSettingById($setting_name);
@@ -160,7 +209,7 @@ class CloudFlareZoneForm extends ConfigFormBase {
       }
     }
 
-    \Drupal::service('cloudflare.zone')->updateZone($zone_settings);
+    $this->zoneApi->updateZoneSettings($zone_settings);
     drupal_set_message($this->t('The configuration options have been saved.'));
   }
 
