@@ -11,3 +11,8 @@ services:
     arguments: ['%cloudflare.cache_tag_header_limit%']
     tags:
       - { name: event_subscriber }
+
+  cloudflare.boot:
+    class: Drupal\cloudflare\EventSubscriber\CloudFlareBoot
+    tags:
+      - { name: event_subscriber }
