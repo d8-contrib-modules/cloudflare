@@ -15,3 +15,8 @@ services:
   logger.channel.cloudflare:
     parent: logger.channel_base
     arguments: ['cloudflare']
+
+  cloudflare.boot:
+    class: Drupal\cloudflare\EventSubscriber\CloudFlareBoot
+    tags:
+      - { name: event_subscriber }
