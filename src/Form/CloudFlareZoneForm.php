@@ -28,7 +28,7 @@ class CloudFlareZoneForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'cloudflare.settings'
+      'cloudflare.settings',
     ];
   }
 
