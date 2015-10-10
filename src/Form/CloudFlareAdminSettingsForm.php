@@ -22,7 +22,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return [
-      'cloudflare.settings'
+      'cloudflare.settings',
     ];
   }
 
@@ -49,7 +49,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase {
       '#title' => $this->t('CloudFlare API Key'),
       '#description' => $this->t('Your API key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
       '#default_value' => $config->get('apikey'),
-      '#required' => TRUE
+      '#required' => TRUE,
     ];
     $form['api_credentials_fieldset']['email'] = [
       '#type' => 'textfield',
