@@ -171,7 +171,7 @@ class CloudFlareZoneSettingRenderer {
     }
 
     $row[ZoneSettings::SETTING_WRAPPER_ID] = [
-      '#markup' => $setting->getZoneSettingName()
+      '#markup' => $setting->getZoneSettingName(),
     ];
 
     $row[ZoneSettings::SETTING_WRAPPER_VALUE] = [$value_render];
@@ -220,7 +220,7 @@ class CloudFlareZoneSettingRenderer {
       '#type' => 'textfield',
       '#default_value' => $setting->getValue(),
       '#size' => 20,
-      '#disabled' => !($setting->isEditable())
+      '#disabled' => !($setting->isEditable()),
     ];
 
     return $setting;
@@ -262,7 +262,7 @@ class CloudFlareZoneSettingRenderer {
     return [
       ZoneSettings::SETTING_MINIFY_CSS => $css_checkbox,
       ZoneSettings::SETTING_MINIFY_JS => $js_checkbox,
-      ZoneSettings::SETTING_MINIFY_HTML => $html_checkbox
+      ZoneSettings::SETTING_MINIFY_HTML => $html_checkbox,
     ];
   }
 
@@ -285,7 +285,7 @@ class CloudFlareZoneSettingRenderer {
       '#title' => 'Mobile Subdomain',
       '#default_value' => $mobile_subdomain,
       '#size' => 20,
-      '#disabled' => !($setting->isEditable())
+      '#disabled' => !($setting->isEditable()),
     ];
 
     $mobile_redirect_checkbox = [
@@ -302,7 +302,11 @@ class CloudFlareZoneSettingRenderer {
       '#disabled' => !($setting->isEditable()),
     ];
 
-    return [$mobile_subdomain_textfield, $mobile_redirect_checkbox, $strip_uri_checkbox];
+    return [
+      $mobile_subdomain_textfield,
+      $mobile_redirect_checkbox,
+      $strip_uri_checkbox,
+    ];
   }
 
   /**
