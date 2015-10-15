@@ -101,10 +101,6 @@ class CloudFlareZoneSettingRenderer {
    *   Render array representing the zone settings.
    */
   public function renderZoneSettings($zone_id = NULL) {
-    if (is_null($zone_id)) {
-      $zone_id = $this->zones[0]->getZoneId();
-    }
-
     // Build the sortable table header.
     $header = [
       ZoneSettings::SETTING_WRAPPER_ID => t('Setting Name'),
@@ -119,7 +115,7 @@ class CloudFlareZoneSettingRenderer {
       '#multiple' => FALSE,
     );
 
-    $zone = $this->zoneApi->getZoneSettings($zone_id);
+    $zone = \Drupal::service('cloudflare.zone')->getZoneSettings();
 
     foreach ($zone->getSettings() as $zone_setting) {
       $setting_render = $this->renderSetting($zone_setting);
