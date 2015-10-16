@@ -7,11 +7,8 @@
 
 namespace Drupal\cloudflare\Form;
 
-use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
-use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
-
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -91,9 +88,7 @@ class CloudFlareZoneForm extends ConfigFormBase {
 
     // @todo.  Might be worth saving this in the form_state so we don't need
     // to load this 2x.
-    $this->config = \Drupal::config('cloudflare.settings');
-    $zone_api = new ZoneApi($this->config->get('apikey'), $this->config->get('email'));
-    $zone_settings = $zone_api->getZoneSettings($zone_id);
+    $zone_settings = \Drupal::service('cloudflare.zone')->getZoneSettings();
 
     foreach ($form_user_input as $setting_name => $value_wrapper) {
       $current_setting = $zone_settings->getSettingById($setting_name);
@@ -165,23 +160,7 @@ class CloudFlareZoneForm extends ConfigFormBase {
       }
     }
 
-    try {
-      $zone_api->updateZone($zone_settings);
-    }
-
-    catch (CloudFlareHttpException $e) {
-      drupal_set_message("Unable to connect to CloudFlare. " . $e->getMessage(), 'error');
-      \Drupal::logger('cloudflare')->error($e->getMessage());
-      $form['zone']['#access'] = FALSE;
-      return;
-    }
-
-    catch (CloudFlareApiException $e) {
-      drupal_set_message("Unable to connect to CloudFlare. " . $e->getMessage(), 'error');
-      \Drupal::logger('cloudflare')->error($e->getMessage());
-      return;
-    }
-
+    \Drupal::service('cloudflare.zone')->updateZone($zone_settings);
     drupal_set_message($this->t('The configuration options have been saved.'));
   }
 
