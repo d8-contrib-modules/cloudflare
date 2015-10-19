@@ -115,7 +115,11 @@ class Config implements CloudFlareConfigInterface {
     $num_zones_from_api = count($zones_from_api);
     $is_single_zone_cloudflare_account = $num_zones_from_api == 1;
     if ($is_single_zone_cloudflare_account) {
-      return $zones_from_api[0]->getZoneId();
+
+      // If there is a default zone that we can set do so in CMI.
+      $zone_id = $zones_from_api[0]->getZoneId();
+      $this->config->set('zone', $zone_id);
+      return $zone_id;
     }
 
     // If the zone has multiple accounts and none is specified in CMI we cannot
