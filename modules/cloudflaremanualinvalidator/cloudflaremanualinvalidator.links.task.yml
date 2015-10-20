@@ -1,5 +1,0 @@
-cloudflare.admin_settings_form.cache_clear:
-  title: 'Cache Clearing'
-  route_name: cloudflare.cache_clear_form
-  base_route: cloudflare.admin_settings_form
-  weight: 10

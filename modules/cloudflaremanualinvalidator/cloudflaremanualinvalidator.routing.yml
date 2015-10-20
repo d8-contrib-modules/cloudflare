@@ -1,9 +1,0 @@
-cloudflare.cache_clear_form:
-  path: '/admin/config/services/cloudflare/cache-clear'
-  parent: system.admin_config_services.cloudflare.admin_settings_form
-  defaults:
-    _form: '\Drupal\cloudflaremanualinvalidator\Form\CloudFlareCacheClearForm'
-    _title: 'CloudFlare Cache Clear'
-  requirements:
-    _permission: 'access administration pages'
-
