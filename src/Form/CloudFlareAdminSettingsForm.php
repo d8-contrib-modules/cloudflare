@@ -12,12 +12,13 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\cloudflare\CloudFlareStateInterface;
 use Drupal\cloudflare\CloudFlareZoneInterface;
 use Egulias\EmailValidator\EmailValidator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareException;
-
 
 /**
  * Class CloudFlareAdminSettingsForm.
@@ -55,10 +56,20 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
   protected $logger;
 
   /**
+   * Tracks rate limits associated with CloudFlare Api.
+   *
+   * @var \Drupal\cloudflare\CloudFlareStateInterface
+   */
+  protected $state;
+
+
+  /**
    * Constructs a new CloudFlareAdminSettingsForm.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The factory for configuration objects.
+   * @param \Drupal\cloudflare\CloudFlareStateInterface $state
+   *   Tracks rate limits associated with CloudFlare Api.
    * @param \Drupal\cloudflare\CloudFlareZoneInterface $zone_api
    *   ZoneApi instance for accessing api.
    * @param \Psr\Log\LoggerInterface $logger
@@ -66,8 +77,9 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    * @param \Egulias\EmailValidator\EmailValidator $email_validator
    *   The email validator.
    */
-  public function __construct(ConfigFactoryInterface $config, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, EmailValidator $email_validator) {
+  public function __construct(ConfigFactoryInterface $config, CloudFlareStateInterface $state, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, EmailValidator $email_validator) {
     $this->config = $config->getEditable('cloudflare.settings');
+    $this->state = $state;
     $this->zoneApi = $zone_api;
     $this->logger = $logger;
     $this->emailValidator = $email_validator;
@@ -79,6 +91,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('cloudflare.state'),
       $container->get('cloudflare.zone'),
       $container->get('logger.factory')->get('cloudflare'),
       new EmailValidator()
@@ -121,6 +134,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       '#type' => 'textfield',
       '#title' => $this->t('Account e-mail address'),
       '#default_value' => $this->config->get('email'),
+      '#required' => TRUE,
     ];
 
     return parent::buildForm($form, $form_state);
@@ -131,10 +145,26 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $email = $form_state->getValue('email');
+    $apikey = $form_state->getValue('apikey');
     $is_email_valid = $this->emailValidator->isValid($email);
+
+    // Using the bare-metal-class here for diagnostic purposes.
+    $zone_api_direct = new ZoneApi($apikey, $email);
 
     if (!$is_email_valid) {
       $form_state->setErrorByName('email', $this->t('Please enter a valid e-mail address.'));
+    }
+
+    try {
+      // Simply using this call to confirm that the creds can authenticate
+      // against the CloudFlareApi. An exception here tell us the creds are
+      // invalid.
+      $zone_api_direct->listZones();
+      $this->state->incrementApiRateCount();
+    }
+
+    catch (\Exception $e) {
+      $form_state->setErrorByName('apikey', $this->t('Unfortunately your credentials failed to authenticate against the CloudFlare API.  Please enter valid credentials.'));
     }
 
     parent::validateForm($form, $form_state);
@@ -146,7 +176,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
 
-    // Attempt to interpolate the current zone.
     $zone_id = $this->getZoneId();
 
     if ($zone_id) {
