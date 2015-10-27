@@ -15,19 +15,38 @@ use DateTime;
  */
 class State implements CloudFlareStateInterface {
   const TAG_PURGE_DAILY_COUNT = "cloudflare_tag_purge_daily_count";
-  const API_RATE_COUNT = "cloudflare_api_rate_count";
+  const TAG_PURGE_DAILY_COUNT_START = "cloudflare_tag_purge_daily_start";
 
-  const TAG_PURGE_DAILY_COUNT_START = "cloudflare_tag_purge_daily_count";
-  const API_RATE_COUNT_START = "cloudflare_api_rate_count";
+  const API_RATE_COUNT = "cloudflare_api_rate_count";
+  const API_RATE_COUNT_START = "cloudflare_api_rate_count_start";
+
+  /**
+   * Tracks rate limits associated with CloudFlare Api.
+   *
+   * @var \Drupal\cloudflare\CloudFlareStateInterface
+   */
+  protected $state;
+
+
+  /**
+   * Timestamp service.
+   *
+   * @var \Drupal\CloudFlare\CloudFlareTimestampInterface
+   */
+  protected $timestamper;
+
 
   /**
    * State constructor.
    *
    * @param \Drupal\Core\State\StateInterface $state
    *   The drupal state service.
+   * @param \Drupal\CloudFlare\CloudFlareTimestampInterface $timestamper
+   *   Cloudflare timestamp service.
    */
-  public function __construct(StateInterface $state) {
+  public function __construct(StateInterface $state, CloudFlareTimestampInterface $timestamper) {
     $this->state = $state;
+    $this->timestamper = $timestamper;
   }
 
   /**
@@ -38,7 +57,7 @@ class State implements CloudFlareStateInterface {
     $last_recorded_timestamp = $this->state->get(self::TAG_PURGE_DAILY_COUNT_START);
     $last_recorded_timestamp = is_null($last_recorded_timestamp) ? new DateTime('2001-01-01') : $last_recorded_timestamp;
 
-    $now = new DateTime();
+    $now = $this->timestamper->now();
     $todays_date = $now->format('Y-m-d');
     $last_recorded_date = $last_recorded_timestamp->format('Y-m-d');
 
@@ -48,7 +67,8 @@ class State implements CloudFlareStateInterface {
     }
 
     else {
-      $this->state->set(self::TAG_PURGE_DAILY_COUNT, ++$count);
+      $count++;
+      $this->state->set(self::TAG_PURGE_DAILY_COUNT, $count);
     }
   }
 
@@ -63,21 +83,21 @@ class State implements CloudFlareStateInterface {
    * {@inheritdoc}
    */
   public function incrementApiRateCount() {
-    $count = $this->state->get(self::API_RATE_COUNT_START);
+    $count = $this->state->get(self::API_RATE_COUNT);
     $last_recorded_timestamp = $this->state->get(self::API_RATE_COUNT_START);
     $last_recorded_timestamp = is_null($last_recorded_timestamp) ? new DateTime('2001-01-01') : $last_recorded_timestamp;
 
-    $now = new DateTime();
-    $interval = $now->diff($last_recorded_timestamp);
-    $minutes_passed = $interval->format('%i');
+    $now = $this->timestamper->now();
+    $diff = $now->getTimestamp() - $last_recorded_timestamp->getTimestamp();
+    $minutes_passed = $diff / 60;
 
-    if (empty($last_recorded_timestamp) || $minutes_passed > 5) {
-      $this->state->set(self::API_RATE_COUNT_START, 1);
+    if ($minutes_passed >= 5) {
+      $this->state->set(self::API_RATE_COUNT, 1);
       $this->state->set(self::API_RATE_COUNT_START, $now);
     }
 
     else {
-      $this->state->set(self::API_RATE_COUNT_START, ++$count);
+      $this->state->set(self::API_RATE_COUNT, ++$count);
     }
   }
 
@@ -85,7 +105,8 @@ class State implements CloudFlareStateInterface {
    * {@inheritdoc}
    */
   public function getApiRateCount() {
-    return $this->state->get(self::API_RATE_COUNT_START);
+    $count = $this->state->get(self::API_RATE_COUNT);
+    return $count;
   }
 
 }

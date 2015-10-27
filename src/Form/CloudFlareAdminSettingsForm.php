@@ -60,7 +60,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The factory for configuration objects.
    * @param \Drupal\cloudflare\CloudFlareZoneInterface $zone_api
-   *   The email validator.
+   *   ZoneApi instance for accessing api.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
    * @param \Egulias\EmailValidator\EmailValidator $email_validator
