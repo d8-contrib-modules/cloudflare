@@ -1,14 +1,18 @@
 services:
+  cloudflare.timestamp:
+    class: Drupal\cloudflare\Timestamp
   cloudflare.state:
     class: Drupal\cloudflare\State
-    arguments: ['@state']
+    arguments: ['@state', '@cloudflare.timestamp']
     tags:
       - { name: cloudflare}
   cloudflare.zone:
     class: Drupal\cloudflare\Zone
+    factory: Drupal\cloudflare\Zone::create
     arguments: ['@config.factory', '@logger.channel.cloudflare', '@cloudflare.state']
     tags:
       - { name: cloudflare}
   logger.channel.cloudflare:
     parent: logger.channel_base
     arguments: ['cloudflare']
+

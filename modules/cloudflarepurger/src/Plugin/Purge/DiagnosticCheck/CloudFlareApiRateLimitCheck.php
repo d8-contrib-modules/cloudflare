@@ -30,7 +30,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class CloudFlareApiRateLimitCheck extends DiagnosticCheckBase implements DiagnosticCheckInterface {
-  use StringTranslationTrait;
 
   /**
    * Tracks rate limits associated with CloudFlare Api.

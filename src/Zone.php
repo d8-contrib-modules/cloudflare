@@ -62,6 +62,24 @@ class Zone implements CloudFlareZoneInterface {
   protected $validCredentials;
 
   /**
+   * {@inheritdoc}
+   */
+  public static function create(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state) {
+    $cf_config = $config->get('cloudflare.settings');
+    $api_key = $cf_config->get('apikey');
+    $email = $cf_config->get('email');
+
+    $zoneapi = new ZoneApi($api_key, $email);
+
+    return new static(
+      $config,
+      $logger,
+      $state,
+      $zoneapi
+    );
+  }
+
+  /**
    * Zone constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
@@ -70,17 +88,16 @@ class Zone implements CloudFlareZoneInterface {
    *   A logger instance.
    * @param \Drupal\cloudflare\CloudFlareStateInterface $state
    *   Tracks rate limits associated with CloudFlare Api.
+   * @param \CloudFlarePhpSdk\ApiEndpoints\ZoneApi $zone_api
+   *   ZoneApi instance for accessing api.
    */
-  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state) {
+  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state, ZoneApi $zone_api) {
     $this->config = $config->get('cloudflare.settings');
     $this->logger = $logger;
     $this->state = $state;
-
-    $api_key = $this->config->get('apikey');
-    $email = $this->config->get('email');
+    $this->zoneApi = $zone_api;
     $this->zone = $this->config->get('zone');
 
-    $this->zoneApi = new ZoneApi($api_key, $email);
     $this->validCredentials = $this->config->get('valid_credentials');
   }
 
