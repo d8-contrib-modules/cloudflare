@@ -22,19 +22,3 @@ function cloudflare_help($route_name, RouteMatchInterface $route_match) {
     default:
   }
 }
-
-/**
- * Implements hook_requirements().
- */
-function address_requirements($phase) {
-  $requirements = [];
-  if ($phase == 'install') {
-    if (!class_exists('\CloudFlarePhpSdk\ApiEndpoints\ZoneApi')) {
-      $requirements['cloudflate_library'] = [
-        'description' => t('Address requires the d8-contrib-modules/cloudflarephpsdk library.'),
-        'severity' => REQUIREMENT_ERROR,
-      ];
-    }
-  }
-  return $requirements;
-}

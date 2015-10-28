@@ -89,7 +89,7 @@
                 standard="${repo.root}/vendor/drupal/coder/coder_sniffer/Drupal/"
                 showWarnings="true"
                 haltonerror="true"
-                haltonwarning="true">
+                haltonwarning="false">
             <fileset refid="custom.files"/>
             <formatter type="full" usefile="false"/>
         </phpcodesniffer>

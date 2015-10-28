@@ -2,12 +2,12 @@
   "name": "drupal/cloudflare",
   "type": "module",
   "description": "Drupal module for interacting with CloudFlare's SDK. CloudFlare is a copyright of CloudFlare, Inc.  The authors of this tool has no association with CloudFlare, Inc.",
-  "keywords": ["Drupal, CloudFlare", "Cloud Flare"],
-  "homepage": "https://github.com/adweingarten/cloudflare",
+  "keywords": ["Drupal, CloudFlare", "Cloud Flare", "CDN"],
+  "homepage": "https://github.com/d8-contrib-modules/cloudflare",
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
-    "d8-contrib-modules/cloudflarephpsdk": "dev-master"
+    "d8-contrib-modules/cloudflarephpsdk": "1.0.0-alpha1"
   },
   "require-dev": {
     "drupal/coder":                 "8.2.*",

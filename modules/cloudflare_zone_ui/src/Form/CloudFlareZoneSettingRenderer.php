@@ -2,11 +2,14 @@
 
 /**
  * @file
- * Contains Drupal\cloudflare\CloudFlareSettingRenderer.
+ * Contains Drupal\cloudflare_zone_ui\CloudFlareSettingRenderer.
  */
 
-namespace Drupal\cloudflare\Form;
-use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
+namespace Drupal\cloudflare_zone_ui\Form;
+
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\cloudflare\CloudFlareZoneInterface;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBase;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBool;
@@ -14,8 +17,8 @@ use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMinify;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingMobileRedirect;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSecurityHeader;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingSelectBase;
-use CloudFlarePhpSdk\Exceptions\CloudFlareHttpException;
-use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
+use CloudFlarePhpSdk\Exceptions\CloudFlareException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class CloudFlareZoneSettingRenderer.
@@ -24,17 +27,43 @@ use CloudFlarePhpSdk\Exceptions\CloudFlareApiException;
  * as Form API fields.
  */
 class CloudFlareZoneSettingRenderer {
-  private $zoneApi;
-  private $config;
-  private $zones;
+  use StringTranslationTrait;
+
+  /**
+   * The zone interface.
+   *
+   * @var \Drupal\cloudflare\CloudFlareZoneInterface
+   */
+  protected $zoneApi;
+
+  /**
+   * The settings configuration.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
+   * A logger instance.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
 
   /**
    * Constructor for CloudFlareZoneSettingRenderer.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   *   The factory for configuration objects.
+   * @param \Drupal\cloudflare\CloudFlareZoneInterface $zone_api
+   *   The email validator.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   A logger instance.
    */
-  public function __construct() {
-    $this->config = \Drupal::config('cloudflare.settings');
-    $this->zoneApi = new ZoneApi($this->config->get('apikey'), $this->config->get('email'));
-    $this->zones = $this->zoneApi->listZones();
+  public function __construct(ConfigFactoryInterface $config, CloudFlareZoneInterface $zone_api, LoggerInterface $logger) {
+    $this->config = $config->get('cloudflare');
+    $this->zoneApi = $zone_api;
+    $this->logger = $logger;
   }
 
   /**
@@ -45,40 +74,31 @@ class CloudFlareZoneSettingRenderer {
    */
   public function buildZoneListing() {
     $form_select_field = [];
-
+    $zones = $this->zoneApi->listZones();
     // Build the Zone Selector.
     try {
       $zone_select = [];
-      foreach ($this->zones as $zone) {
+      foreach ($zones as $zone) {
         $zone_select[$zone->getZoneId()] = $zone->getName();
       }
 
       $form_select_field = [
         '#type' => 'select',
-        '#title' => t('Selected'),
+        '#title' => $this->t('Selected'),
         '#options' => $zone_select,
-        '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
+        '#description' => $this->t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
       ];
     }
     // If we were unable to get results back from the API attempt to provide
     // meaningful feedback to the user.
-    catch (CloudFlareHttpException $e) {
+    catch (CloudFlareException $e) {
       $form_select_field['zone_api_exception'] = [
         '#type' => 'text',
         '#title' => $this->t($e->getMessage()),
       ];
 
-      \Drupal::logger('cloudflare')->notice($e->getMessage(), WATCHDOG_ERROR);
+      $this->logger->notice($e->getMessage());
     }
-
-    catch (CloudFlareApiException $e) {
-      $form_select_field['zone_api_exception'] = [
-        '#type' => 'text',
-        '#title' => $this->t($e->getMessage()),
-      ];
-      \Drupal::logger('cloudflare')->notice($e->getMessage(), WATCHDOG_ERROR);
-    }
-
     // If all else fails.
     catch (\Exception $e) {
       $form_select_field['zone_api_exception'] = [
@@ -86,7 +106,7 @@ class CloudFlareZoneSettingRenderer {
         '#title' => $this->t($e->getMessage()),
       ];
 
-      \Drupal::logger('cloudflare')->notice($e->getMessage(), WATCHDOG_ERROR);
+      $this->logger->notice($e->getMessage());
     }
     return $form_select_field;
   }
@@ -101,16 +121,12 @@ class CloudFlareZoneSettingRenderer {
    *   Render array representing the zone settings.
    */
   public function renderZoneSettings($zone_id = NULL) {
-    if (is_null($zone_id)) {
-      $zone_id = $this->zones[0]->getZoneId();
-    }
-
     // Build the sortable table header.
     $header = [
-      ZoneSettings::SETTING_WRAPPER_ID => t('Setting Name'),
-      ZoneSettings::SETTING_WRAPPER_VALUE => t('Value'),
-      ZoneSettings::SETTING_WRAPPER_EDITABLE => t('Editable'),
-      ZoneSettings::SETTING_WRAPPER_MODIFIED_ON => t('Time Last Modified'),
+      ZoneSettings::SETTING_WRAPPER_ID => $this->t('Setting Name'),
+      ZoneSettings::SETTING_WRAPPER_VALUE => $this->t('Value'),
+      ZoneSettings::SETTING_WRAPPER_EDITABLE => $this->t('Editable'),
+      ZoneSettings::SETTING_WRAPPER_MODIFIED_ON => $this->t('Time Last Modified'),
     ];
 
     $tableselect_settings = array(
@@ -119,7 +135,7 @@ class CloudFlareZoneSettingRenderer {
       '#multiple' => FALSE,
     );
 
-    $zone = $this->zoneApi->getZoneSettings($zone_id);
+    $zone = $this->zoneApi->getZoneSettings();
 
     foreach ($zone->getSettings() as $zone_setting) {
       $setting_render = $this->renderSetting($zone_setting);
@@ -142,10 +158,10 @@ class CloudFlareZoneSettingRenderer {
    *   Rendered zone setting.
    */
   public function renderSetting(ZoneSettingBase $setting) {
-    $current_type = get_class($setting);
+    $type = get_class($setting);
     $row = [];
 
-    switch ($current_type) {
+    switch ($type) {
       case 'CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettingBool':
         $value_render = $this->renderZoneSettingBool($setting);
         break;
@@ -338,7 +354,7 @@ class CloudFlareZoneSettingRenderer {
 
     $form_select_field = [
       '#type' => 'select',
-      '#title' => t('Selected'),
+      '#title' => $this->t('Selected'),
       '#options' => $assoc_select_options,
       '#default_value' => $setting->getValue(),
       '#disabled' => !$setting->isEditable(),
