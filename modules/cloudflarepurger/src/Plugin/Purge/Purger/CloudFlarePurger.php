@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\cloudflare\Plugin\PurgePurger\CloudFlareTagPurger.
+ * Contains \Drupal\cloudflare\Plugin\PurgePurger\CloudFlarePurger.
  */
 
 namespace Drupal\cloudflarepurger\Plugin\Purge\Purger;
@@ -123,6 +123,9 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
     $this->invalidateMultiple([$invalidation]);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function invalidateMultiple(array $invalidations) {
     // @todo figure out why this is happening.
     if (count($invalidations) == 0) {
@@ -136,29 +139,11 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function getTimeHint() {
     return 1.3;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function invalidateMultipleTags(array $invalidations) {
-    $this->invalidateMultiple($invalidations);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function invalidateMultipleEverything(array $invalidations) {
-    $this->invalidateMultiple($invalidations);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function invalidateMultipleUrls(array $invalidations) {
-    $this->invalidateMultiple($invalidations);
   }
 
   /**
@@ -194,7 +179,7 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
         $tags = Cache::mergeTags($api_targets_to_purge, $hashes);
 
         $this->zoneApi->purgeTags($this->zone, $tags);
-        $this->state->incrementApiRateCount();
+        $this->state->incrementTagPurgeDailyCount();
       }
 
       elseif ($invalidation_type == 'url') {
