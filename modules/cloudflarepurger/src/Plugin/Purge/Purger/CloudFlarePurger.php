@@ -82,7 +82,7 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
   }
 
   /**
-   * Constructs a \Drupal\Component\Plugin\CloudFlareTagPurger.
+   * Constructs a \Drupal\Component\Plugin\CloudFlarePurger.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -93,7 +93,7 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The factory for configuration objects.
    * @param \Drupal\cloudflare\CloudFlareStateInterface $state
-   *   Tracks rate limits associated with CloudFlare Api.
+   *   Tracks limits associated with CloudFlare Api.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
    *
@@ -101,6 +101,8 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
    *   Thrown if $configuration['id'] is missing, see Purger\Service::createId.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config, CloudFlareStateInterface $state, LoggerInterface $logger) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+
     $this->config = $config->get('cloudflare.settings');
     $this->state = $state;
     $this->logger = $logger;
@@ -112,8 +114,6 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
     $email = $this->config->get('email');
     $this->zone = $this->config->get('zone');
     $this->zoneApi = new ZoneApi($api_key, $email);
-
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
   /**
@@ -127,12 +127,6 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
    * {@inheritdoc}
    */
   public function invalidateMultiple(array $invalidations) {
-    // @todo figure out why this is happening.
-    if (count($invalidations) == 0) {
-      $this->logger->warning("No Invalidations?  That's odd." . print_r($invalidations, TRUE));
-      return;
-    }
-
     $chunks = array_chunk($invalidations, CloudFlareAPI::MAX_TAG_PURGES_PER_REQUEST);
     foreach ($chunks as $chunk) {
       $this->purgeChunk($chunk);

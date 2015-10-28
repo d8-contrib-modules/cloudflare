@@ -204,7 +204,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
     try {
       $zones_from_api = $this->zoneApi->listZones();
     }
-
     catch (CloudFlareException $e) {
       $this->logger->error($e->getMessage());
       return NULL;

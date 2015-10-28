@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Checks that the site is within CloudFlare's API rate limits.
  *
+ * @todo We hope that one day this limit goes away.
  * CloudFlare currently has a rate limit of 1200 Api calls every 5 minutes.
  *
  * @see https://api.cloudflare.com/#requests

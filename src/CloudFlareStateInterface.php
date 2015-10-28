@@ -11,11 +11,12 @@ namespace Drupal\cloudflare;
  */
 interface CloudFlareStateInterface {
   /**
-   * Increment the count of tag purges done today.
+   * Get the count of purges done in the past 5 minutes.
    *
-   * @see https://support.cloudflare.com/hc/en-us/articles/206596608-How-to-Purge-Cache-Using-Cache-Tags
+   * @return int
+   *   Count of purges done in the past 5 minutes
    */
-  public function incrementTagPurgeDailyCount();
+  public function getApiRateCount();
 
   /**
    * Get the count of tag purges done today.
@@ -33,11 +34,10 @@ interface CloudFlareStateInterface {
   public function incrementApiRateCount();
 
   /**
-   * Get the count of purges done in the past 5 minutes.
+   * Increment the count of tag purges done today.
    *
-   * @return int
-   *   Count of purges done in the past 5 minutes
+   * @see https://support.cloudflare.com/hc/en-us/articles/206596608-How-to-Purge-Cache-Using-Cache-Tags
    */
-  public function getApiRateCount();
+  public function incrementTagPurgeDailyCount();
 
 }
