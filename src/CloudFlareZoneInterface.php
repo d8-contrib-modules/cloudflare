@@ -23,7 +23,7 @@ interface CloudFlareZoneInterface {
   /**
    * Gets the zone's settings from CloudFlare's API.
    *
-   * @return \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings|NULL
+   * @return \CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings|null
    *   Zone settings retrieved from the CloudFlareAPI. NULL if unable to
    *   retrieve.
    */
@@ -36,8 +36,7 @@ interface CloudFlareZoneInterface {
    *   A array of CloudFlareZones objects from the current CloudFlare account.
    *
    * @throws \CloudFlarePhpSdk\Exceptions\CloudFlareApiException
-   *   Throws an exception if there is an application level error returned from
-   *   the API.
+   *   Application level error returned from the API.
    */
   public function listZones();
 

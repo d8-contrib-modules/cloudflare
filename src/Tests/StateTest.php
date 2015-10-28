@@ -2,10 +2,10 @@
 
 /**
  * @file
- * Definition of Drupal\acquia_search\Tests\AcquiaConnectorSearchTest.
+ * Definition of Drupal\cloudflare\Tests.
  */
 
-namespace Drupal\cloudflare\Tests;
+namespace Drupal\cloudflare\Tests\StateTest;
 
 use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
 use DateTime;

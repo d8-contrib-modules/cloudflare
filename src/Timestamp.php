@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provides an injectable service for a Timestamp.
+ * Definition of \Drupal\cloudflare\Timestamp.
  */
 
 namespace Drupal\cloudflare;

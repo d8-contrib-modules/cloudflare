@@ -59,7 +59,7 @@ class State implements CloudFlareStateInterface {
     $todays_date = $now->format('Y-m-d');
     $last_recorded_date = $last_recorded_timestamp->format('Y-m-d');
 
-    if (empty($last_recorded_timestamp) || $last_recorded_date != $todays_date) {
+    if (empty($last_recorded_timestamp) || ($last_recorded_date != $todays_date)) {
       $this->state->set(self::TAG_PURGE_DAILY_COUNT, 1);
       $this->state->set(self::TAG_PURGE_DAILY_COUNT_START, $now);
     }

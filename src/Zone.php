@@ -68,7 +68,6 @@ class Zone implements CloudFlareZoneInterface {
     $cf_config = $config->get('cloudflare.settings');
     $api_key = $cf_config->get('apikey');
     $email = $cf_config->get('email');
-
     $zoneapi = new ZoneApi($api_key, $email);
 
     return new static(
@@ -97,7 +96,6 @@ class Zone implements CloudFlareZoneInterface {
     $this->state = $state;
     $this->zoneApi = $zone_api;
     $this->zone = $this->config->get('zone');
-
     $this->validCredentials = $this->config->get('valid_credentials');
   }
 
@@ -112,10 +110,8 @@ class Zone implements CloudFlareZoneInterface {
     try {
       $settings = $this->zoneApi->getZoneSettings($this->zone);
       $this->state->incrementApiRateCount();
-
       return $settings;
     }
-
     catch (CloudFlareException $e) {
       $this->logger->error($e->getMessage());
       throw $e;
@@ -134,7 +130,6 @@ class Zone implements CloudFlareZoneInterface {
       $this->zoneApi->updateZone($zone_settings);
       $this->state->incrementApiRateCount();
     }
-
     catch (CloudFlareException $e) {
       $this->logger->error($e->getMessage());
       throw $e;
@@ -150,7 +145,6 @@ class Zone implements CloudFlareZoneInterface {
       $zones = $this->zoneApi->listZones();
       $this->state->incrementApiRateCount();
     }
-
     catch (CloudFlareException $e) {
       $this->logger->error($e->getMessage());
       throw $e;

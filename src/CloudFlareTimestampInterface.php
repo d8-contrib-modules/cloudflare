@@ -13,7 +13,7 @@ interface CloudFlareTimestampInterface {
   /**
    * Gets the current DateTime.
    *
-   * @return DateTime
+   * @return \DateTime
    *   DateTime representing the current time.
    */
   public function now();
