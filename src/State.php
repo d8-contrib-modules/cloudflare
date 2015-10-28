@@ -27,14 +27,12 @@ class State implements CloudFlareStateInterface {
    */
   protected $state;
 
-
   /**
    * Timestamp service.
    *
    * @var \Drupal\CloudFlare\CloudFlareTimestampInterface
    */
   protected $timestamper;
-
 
   /**
    * State constructor.

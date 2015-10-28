@@ -15,4 +15,3 @@ services:
   logger.channel.cloudflare:
     parent: logger.channel_base
     arguments: ['cloudflare']
-

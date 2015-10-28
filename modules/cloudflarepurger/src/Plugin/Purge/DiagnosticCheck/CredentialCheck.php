@@ -20,10 +20,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   title = @Translation("CloudFlare - Credentials"),
  *   description = @Translation("Checks to see if the credentials for CloudFlare are valid."),
  *   dependent_queue_plugins = {},
- *   dependent_purger_plugins = {}
+ *   dependent_purger_plugins = {"cloudflare"}
  * )
  */
-class CloudFlareCredentialCheck extends DiagnosticCheckBase implements DiagnosticCheckInterface {
+class CredentialCheck extends DiagnosticCheckBase implements DiagnosticCheckInterface {
   /**
    * The settings configuration.
    *
@@ -67,11 +67,11 @@ class CloudFlareCredentialCheck extends DiagnosticCheckBase implements Diagnosti
     $has_valid_credentials = $this->config->get('valid_credentials');
 
     if (!$has_valid_credentials) {
-      $this->recommendation = $this->t("Invalid API Credentials for CloudFlare.");
+      $this->recommendation = $this->t("Invalid Api credentials.");
       return SELF::SEVERITY_ERROR;
     }
 
-    $this->recommendation = $this->t('Valid Api credentials have been detected.');
+    $this->recommendation = $this->t('Valid Api credentials detected.');
     return SELF::SEVERITY_OK;
   }
 

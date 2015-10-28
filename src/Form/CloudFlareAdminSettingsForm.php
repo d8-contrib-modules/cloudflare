@@ -62,6 +62,18 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    */
   protected $state;
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('cloudflare.state'),
+      $container->get('cloudflare.zone'),
+      $container->get('logger.factory')->get('cloudflare'),
+      new EmailValidator()
+    );
+  }
 
   /**
    * Constructs a new CloudFlareAdminSettingsForm.
@@ -83,19 +95,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
     $this->zoneApi = $zone_api;
     $this->logger = $logger;
     $this->emailValidator = $email_validator;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('cloudflare.state'),
-      $container->get('cloudflare.zone'),
-      $container->get('logger.factory')->get('cloudflare'),
-      new EmailValidator()
-    );
   }
 
   /**
