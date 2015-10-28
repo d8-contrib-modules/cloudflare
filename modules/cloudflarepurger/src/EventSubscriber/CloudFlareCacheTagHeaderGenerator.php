@@ -5,7 +5,7 @@
  * Contains \Drupal\cloudflare\EventSubscriber\CloudFlareCacheTagHeaderGenerator.
  */
 
-namespace Drupal\cloudflare\EventSubscriber;
+namespace Drupal\cloudflarepurger\EventSubscriber;
 
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -17,7 +17,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * @see https://blog.cloudflare.com/introducing-a-powerful-way-to-purge-cache-on-cloudflare-purge-by-cache-tag/
  */
 class CloudFlareCacheTagHeaderGenerator implements EventSubscriberInterface {
-
   /**
    * The CloudFlare Cache-Tag header limit in bytes.
    *

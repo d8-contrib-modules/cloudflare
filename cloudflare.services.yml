@@ -1,13 +1,17 @@
-parameters:
-  cloudflare.cache_tag_header_limit: 255
-
 services:
-  cloudflare.cache_tags.invalidator:
-    class: Drupal\cloudflare\CacheTagsInvalidator
+  cloudflare.timestamp:
+    class: Drupal\cloudflare\Timestamp
+  cloudflare.state:
+    class: Drupal\cloudflare\State
+    arguments: ['@state', '@cloudflare.timestamp']
     tags:
-      - { name: cache_tags_invalidator}
-  cloudflare.cache_tags.surrogate_key_generator:
-    class: Drupal\cloudflare\EventSubscriber\CloudFlareCacheTagHeaderGenerator
-    arguments: ['%cloudflare.cache_tag_header_limit%']
+      - { name: cloudflare}
+  cloudflare.zone:
+    class: Drupal\cloudflare\Zone
+    factory: Drupal\cloudflare\Zone::create
+    arguments: ['@config.factory', '@logger.channel.cloudflare', '@cloudflare.state']
     tags:
-      - { name: event_subscriber }
+      - { name: cloudflare}
+  logger.channel.cloudflare:
+    parent: logger.channel_base
+    arguments: ['cloudflare']
