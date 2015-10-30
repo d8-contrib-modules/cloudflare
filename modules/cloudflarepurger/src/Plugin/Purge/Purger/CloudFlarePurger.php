@@ -158,7 +158,7 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
     // This method is unfortunately a bit verbose due to the fact that we
     // need to update the purge states as we proceed.
     foreach ($invalidations as $invalidation) {
-      $invalidation->setState(InvalidationInterface::STATE_PURGING);
+      $invalidation->setState(InvalidationInterface::PROCESSING);
       $api_targets_to_purge[] = $invalidation->getExpression();
     }
 
@@ -185,14 +185,14 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
       }
 
       foreach ($invalidations as $invalidation) {
-        $invalidation->setState(InvalidationInterface::STATE_PURGED);
+        $invalidation->setState(InvalidationInterface::SUCCEEDED);
       }
     }
 
     catch (\Exception $e) {
       foreach ($invalidations as $invalidation) {
         $this->logger->error($e->getMessage());
-        $invalidation->setState(InvalidationInterface::STATE_FAILED);
+        $invalidation->setState(InvalidationInterface::FAILED);
       }
     }
 
