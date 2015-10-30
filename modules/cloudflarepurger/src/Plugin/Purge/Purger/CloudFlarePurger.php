@@ -137,7 +137,7 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
    * {@inheritdoc}
    */
   public function getTimeHint() {
-    return 1.3;
+    return 0.2;
   }
 
   /**
