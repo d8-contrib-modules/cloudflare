@@ -29,6 +29,8 @@ class ClientIpRestore implements EventSubscriberInterface {
 
   const CLOUDFLARE_RANGE_KEY = 'cloudflare_range_key';
   const CLOUDFLARE_CLIENT_IP_RESTORE_ENABLED = 'client_ip_restore_enabled';
+  const IPV4_ENDPOINTS_URL = 'https://www.cloudflare.com/ips-v4';
+  const IPV6_ENDPOINTS_URL = 'https://www.cloudflare.com/ips-v6';
 
   /**
    * Cache backend service.
@@ -52,20 +54,6 @@ class ClientIpRestore implements EventSubscriberInterface {
   protected $httpClient;
 
   /**
-   * The url of the ipv4 cloudflare endpoints listing.
-   *
-   * @var string
-   */
-  protected $ipv4CloudflareEndpointUrl;
-
-  /**
-   * The url of the ipv6 cloudflare endpoints listing.
-   *
-   * @var string
-   */
-  protected $ipv6CloudflareEndpointUrl;
-
-  /**
    * A logger instance.
    *
    * @var \Psr\Log\LoggerInterface
@@ -82,10 +70,6 @@ class ClientIpRestore implements EventSubscriberInterface {
   /**
    * Constructs a UpdateFetcher.
    *
-   * @param string $ipv4_cloudflare_url
-   *   Url with a listing of cloudflare ipv4 endpoints.
-   * @param string $ipv6_cloudflare_url
-   *   Url with a listing of cloudflare ipv6 endpoints.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The factory for configuration objects.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
@@ -95,9 +79,7 @@ class ClientIpRestore implements EventSubscriberInterface {
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
    */
-  public function __construct($ipv4_cloudflare_url, $ipv6_cloudflare_url, ConfigFactoryInterface $config, CacheBackendInterface $cache, ClientInterface $http_client, LoggerInterface $logger) {
-    $this->ipv4CloudflareEndpointUrl = $ipv4_cloudflare_url;
-    $this->ipv6CloudflareEndpointUrl = $ipv6_cloudflare_url;
+  public function __construct(ConfigFactoryInterface $config, CacheBackendInterface $cache, ClientInterface $http_client, LoggerInterface $logger) {
     $this->httpClient = $http_client;
     $this->cache = $cache;
     $this->config = $config->get('cloudflare.settings');
@@ -131,7 +113,7 @@ class ClientIpRestore implements EventSubscriberInterface {
     $cloudflare_ipranges = $this->getCloudFlareIpRanges();
     $has_ip_already_changed = $_SERVER['REMOTE_ADDR'] == $_SERVER['HTTP_CF_CONNECTING_IP'];
     $request_originating_from_cloudflare = IpUtils::checkIp($_SERVER['REMOTE_ADDR'], $cloudflare_ipranges);
-    
+
     if ($has_http_cf_connecting_ip && !$request_originating_from_cloudflare) {
       $this->logger->warning($this->t("REMOTE_ADDR does not match a known CloudFlare IP and there is HTTP_CF_CONNECTING_IP.  Someone is attempting to mask their IP address by setting HTTP_CF_CONNECTING_IP."));
       return;
@@ -140,7 +122,9 @@ class ClientIpRestore implements EventSubscriberInterface {
     // Some environments may make the alteration for us. In which case no
     // action is required.
     if ($has_ip_already_changed) {
-      $this->logger->error($this->t("Request has already been updated.  This should be deactivated."));
+      $link_to_settings = Url::fromRoute('cloudflare.admin_settings_form')->toString();
+      $message = $this->t('Request has already been updated.  This should be deactivated. Please go <a href="@link_to_settings">here</a> to disable "Restore Client Ip Address".', ['@link_to_settings' => $link_to_settings]);
+      $this->logger->error($message);
       return;
     }
 
@@ -157,11 +141,11 @@ class ClientIpRestore implements EventSubscriberInterface {
 
     try {
       $ipv4_raw_listings = (string) $this->httpClient
-        ->get($this->ipv4CloudflareEndpointUrl)
+        ->get(SELF::IPV4_ENDPOINTS_URL)
         ->getBody();
 
       $ipv6_raw_listings = (string) $this->httpClient
-        ->get($this->ipv6CloudflareEndpointUrl)
+        ->get(SELF::IPV6_ENDPOINTS_URL)
         ->getBody();
 
       $iv4_endpoints = explode("\n", $ipv4_raw_listings);
