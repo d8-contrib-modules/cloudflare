@@ -119,14 +119,20 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
   /**
    * {@inheritdoc}
    */
-  public function invalidate(InvalidationInterface $invalidation) {
-    $this->invalidateMultiple([$invalidation]);
+  public function routeTypeToMethod($type) {
+    $methods = [
+      'everything' => 'invalidate',
+      'tag'  => 'invalidate',
+      'url'  => 'invalidate',
+    ];
+
+    return isset($methods[$type]) ? $methods[$type] : 'invalidate';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function invalidateMultiple(array $invalidations) {
+  public function invalidate(array $invalidations) {
     $chunks = array_chunk($invalidations, CloudFlareAPI::MAX_TAG_PURGES_PER_REQUEST);
     foreach ($chunks as $chunk) {
       $this->purgeChunk($chunk);
