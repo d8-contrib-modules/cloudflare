@@ -15,3 +15,8 @@ services:
   logger.channel.cloudflare:
     parent: logger.channel_base
     arguments: ['cloudflare']
+  cloudflare.clientiprestore:
+    class: Drupal\cloudflare\EventSubscriber\ClientIpRestore
+    arguments: ['@config.factory', '@cache.data', '@http_client', '@logger.channel.cloudflare']
+    tags:
+      - { name: event_subscriber }
