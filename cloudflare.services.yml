@@ -1,3 +1,7 @@
+parameters:
+  cloudflare.ipv4_listing: 'https://www.cloudflare.com/ips-v4'
+  cloudflare.ipv6_listing: 'https://www.cloudflare.com/ips-v6'
+
 services:
   cloudflare.timestamp:
     class: Drupal\cloudflare\Timestamp
@@ -17,6 +21,6 @@ services:
     arguments: ['cloudflare']
   cloudflare.clientiprestore:
     class: Drupal\cloudflare\EventSubscriber\ClientIpRestore
-    arguments: ['@config.factory', '@cache.data', '@http_client', '@logger.channel.cloudflare']
+    arguments: ['%cloudflare.ipv4_listing%', '%cloudflare.ipv6_listing%', '@config.factory', '@cache.data', '@http_client', '@logger.channel.cloudflare']
     tags:
       - { name: event_subscriber }
