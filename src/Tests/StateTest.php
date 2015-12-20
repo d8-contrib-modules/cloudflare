@@ -5,7 +5,7 @@
  * Definition of Drupal\cloudflare\Tests.
  */
 
-namespace Drupal\cloudflare\Tests\StateTest;
+namespace Drupal\cloudflare\Tests;
 
 use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
 use DateTime;
@@ -15,6 +15,8 @@ use Drupal\Tests\UnitTestCase;
  * Tests functionality of CloudFlareState object.
  *
  * @group cloudflare
+ *
+ * @covers \Drupal\cloudflare\State
  */
 class StateTest extends UnitTestCase {
 
