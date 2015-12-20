@@ -186,7 +186,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       $form_state->setErrorByName('apikey', $this->t('Unfortunately your credentials failed to authenticate against the CloudFlare API.  Please enter valid credentials.'));
     }
 
-
     try {
       $has_http = strpos($bypass_host, 'http') > -1;
       if ($has_http) {
@@ -205,7 +204,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       $form_state->setErrorByName('bypass_host', $this->t('You have entered an invalid host.'));
     }
 
-
     parent::validateForm($form, $form_state);
   }
 
@@ -214,6 +212,11 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
+
+    // Using the bare-metal-class here since the credentials have not yet been
+    // added to the system.
+    $this->zoneApi = new ZoneApi($form_state->getValue('apikey'), $form_state->getValue('email'));
+
     $zone_id = $this->getZoneId();
 
     if ($zone_id) {
