@@ -122,11 +122,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       '#title' => $this->t('API Credentials'),
     ];
 
-    $form['cloudflare_config'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Configuration'),
-    ];
-
     $form['api_credentials_fieldset']['apikey'] = [
       '#type' => 'textfield',
       '#title' => $this->t('CloudFlare API Key'),
@@ -139,12 +134,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       '#title' => $this->t('Account e-mail address'),
       '#default_value' => $this->config->get('email'),
       '#required' => TRUE,
-    ];
-    $form['cloudflare_config']['client_ip_restore_enabled'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Restore Client Ip Address'),
-      '#description' => $this->t('CloudFlare operates as a reverse proxy and replaces the client IP address. This setting will restore it.<br /> Read more <a href="https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-CloudFlare-handle-HTTP-Request-headers-">here</a>.'),
-      '#default_value' => $this->config->get('client_ip_restore_enabled'),
     ];
 
     return parent::buildForm($form, $form_state);
@@ -185,6 +174,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
+
     $zone_id = $this->getZoneId();
 
     if ($zone_id) {
@@ -192,14 +182,12 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
         ->set('email', $form_state->getValue('email'))
         ->set('zone', $zone_id)
         ->set('valid_credentials', TRUE)
-        ->set('client_ip_restore_enabled', $form_state->getValue('client_ip_restore_enabled'))
         ->save();
     }
 
     else {
       $this->config->set('apikey', $form_state->getValue('apikey'))
         ->set('email', $form_state->getValue('email'))
-        ->set('client_ip_restore_enabled', $form_state->getValue('client_ip_restore_enabled'))
         ->save();
     }
 
