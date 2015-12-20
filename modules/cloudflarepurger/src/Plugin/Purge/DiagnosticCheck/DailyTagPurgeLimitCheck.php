@@ -82,7 +82,7 @@ class DailyTagPurgeLimitCheck extends DiagnosticCheckBase implements DiagnosticC
       ':$daily_count' => $daily_count,
     ];
 
-    if ($daily_count > CloudFlareAPI::API_TAG_PURGE_DAILY_RATE_LIMIT) {
+    if ($daily_count >= CloudFlareAPI::API_TAG_PURGE_DAILY_RATE_LIMIT) {
       $this->recommendation = $this->t('Past Api limit of :daily_count/:daily_limit limit tag purges/day.', $message_variables);
       return SELF::SEVERITY_ERROR;
     }

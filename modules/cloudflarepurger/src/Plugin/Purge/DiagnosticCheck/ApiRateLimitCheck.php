@@ -83,7 +83,7 @@ class ApiRateLimitCheck extends DiagnosticCheckBase implements DiagnosticCheckIn
       ':$rate_count' => $rate_count,
     ];
 
-    if ($rate_count > CloudFlareAPI::API_TAG_PURGE_DAILY_RATE_LIMIT) {
+    if ($rate_count >= CloudFlareAPI::API_RATE_LIMIT) {
       $this->recommendation = $this->t('Exceeded Api limit of :$rate_count/:rate_limit limit purges/day.', $message_variables);
       return SELF::SEVERITY_ERROR;
     }
