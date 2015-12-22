@@ -1,10 +1,14 @@
 <?php
 /**
  * @file
- * Contains \Drupal\cloudflarepurger\Tests\DiagnosticCheck\DiagnosticCheckBase.
+ * Contains \Drupal\cloudflarepurger\DiagnosticCheckBase.
+ *
+ * @todo Relocate this to the tests directory.  Currently core's run tests
+ * auto-detects this as a class with tests to run.  Moving the file outside
+ * of tests was the only workaround.
  */
 
-namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
+namespace Drupal\cloudflarepurger;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
 use Drupal\cloudflare\State;
@@ -14,10 +18,34 @@ use Drupal\Core\DependencyInjection\ContainerBuilder;
  *
  * @group cloudflare
  */
-abstract class DiagnosticCheckBase extends UnitTestCase {
+abstract class DiagnosticCheckTestBase extends UnitTestCase {
+
+  /**
+   * The dependency injection container.
+   *
+   * @var \Drupal\Core\DependencyInjection\ContainerBuilder
+   */
   protected $container;
+
+  /**
+   * Tracks Drupal states.
+   *
+   * @var \Drupal\Core\state\StateInterface
+   */
   protected $drupalState;
+
+  /**
+   * Tracks rate limits associated with CloudFlare Api.
+   *
+   * @var \Drupal\cloudflare\CloudFlareStateInterface
+   */
   protected $cloudflareState;
+
+  /**
+   * Provides timestamps.
+   *
+   * @var \Drupal\cloudflare\Timestamp
+   */
   protected $timestampStub;
 
   /**

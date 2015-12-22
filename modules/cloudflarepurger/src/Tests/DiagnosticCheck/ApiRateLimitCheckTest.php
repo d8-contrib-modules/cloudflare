@@ -5,10 +5,12 @@
  */
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
-use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
-use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\ApiRateLimitCheck;
-use Drupal\cloudflare\State;
 use \DateTime;
+use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
+use Drupal\cloudflare\State;
+use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\ApiRateLimitCheck;
+use Drupal\cloudflarepurger\DiagnosticCheckTestBase;
+
 /**
  * Tests that purge_requirements() passes on our diagnostic checks.
  *
@@ -16,7 +18,7 @@ use \DateTime;
  *
  * @covers \Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\ApiRateLimitCheck
  */
-class ApiRateLimitCheckTest extends DiagnosticCheckBase {
+class ApiRateLimitCheckTest extends DiagnosticCheckTestBase {
   /**
    * Tests that ApiRateLimitCheck Responds as expected with test purge rates.
    *

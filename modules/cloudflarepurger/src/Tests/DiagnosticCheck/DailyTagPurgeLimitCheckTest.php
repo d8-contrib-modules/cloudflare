@@ -5,17 +5,19 @@
  */
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
-use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
-use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\DailyTagPurgeLimitCheck;
-use Drupal\cloudflare\State;
-use Drupal\Core\DependencyInjection\ContainerBuilder;
 use \DateTime;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
+use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
+use Drupal\cloudflare\State;
+use Drupal\cloudflarepurger\DiagnosticCheckTestBase;
+use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\DailyTagPurgeLimitCheck;
+
 /**
  * Tests that purge_requirements() passes on our diagnostic checks.
  *
  * @group cloudflare
  */
-class DailyTagPurgeLimitCheckTest extends DiagnosticCheckBase {
+class DailyTagPurgeLimitCheckTest extends DiagnosticCheckTestBase {
   /**
    * {@inheritdoc}
    */
