@@ -11,17 +11,15 @@ use Drupal\Core\Url;
  */
 function cloudflare_requirements($phase) {
   $requirements = [];
-  if ($phase == 'install') {
-    if (!class_exists('\CloudFlarePhpSdk\ApiEndpoints\ZoneApi')) {
-      $requirements['cloudflare_library'] = [
-        'title' => t('CloudFlare - Php Sdk'),
-        'description' => t('CloudFlare requires the d8-contrib-modules/cloudflarephpsdk library.'),
-        'severity' => REQUIREMENT_ERROR,
-      ];
-    }
+  if (!class_exists('\CloudFlarePhpSdk\ApiEndpoints\ZoneApi')) {
+    $requirements['cloudflare_library'] = [
+      'title' => t('CloudFlare - Php Sdk'),
+      'description' => t('CloudFlare requires the d8-contrib-modules/cloudflarephpsdk library.'),
+      'severity' => REQUIREMENT_ERROR,
+    ];
   }
 
-  elseif ($phase == 'runtime') {
+  if ($phase == 'runtime') {
     $config = \Drupal::config('cloudflare.settings');
     $valid_credentials = $config->get('valid_credentials') === TRUE;
 
