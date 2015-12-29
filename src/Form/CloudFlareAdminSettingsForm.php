@@ -162,9 +162,9 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $email = $form_state->getValue('email');
-    $apikey = $form_state->getValue('apikey');
-    $bypass_host = $form_state->getValue('bypass_host');
+    $email = trim($form_state->getValue('email'));
+    $apikey = trim($form_state->getValue('apikey'));
+    $bypass_host = trim($form_state->getValue('bypass_host'));
     $is_email_valid = $this->emailValidator->isValid($email);
 
     // Using the bare-metal-class here for diagnostic purposes.
@@ -216,27 +216,23 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
     // Using the bare-metal-class here since the credentials have not yet been
     // added to the system.
     $this->zoneApi = new ZoneApi($form_state->getValue('apikey'), $form_state->getValue('email'));
-
     $zone_id = $this->getZoneId();
+    $api_key = trim($form_state->getValue('apikey'));
+    $email = trim($form_state->getValue('email'));
+    $bypass_host = trim(rtrim($form_state->getValue('bypass_host'), "/"));
+    $client_ip_restore_enabled = $form_state->getValue('client_ip_restore_enabled');
+
+    $this->config->set('apikey', $api_key)
+      ->set('email', $email)
+      ->set('valid_credentials', TRUE)
+      ->set('bypass_host', $bypass_host)
+      ->set('client_ip_restore_enabled', $client_ip_restore_enabled);
 
     if ($zone_id) {
-      $this->config->set('apikey', $form_state->getValue('apikey'))
-        ->set('email', $form_state->getValue('email'))
-        ->set('zone', $zone_id)
-        ->set('valid_credentials', TRUE)
-        ->set('bypass_host', rtrim($form_state->getValue('bypass_host'), "/"))
-        ->set('client_ip_restore_enabled', $form_state->getValue('client_ip_restore_enabled'))
-        ->save();
+      $this->config->set('zone', $zone_id);
     }
 
-    else {
-      $this->config->set('apikey', $form_state->getValue('apikey'))
-        ->set('email', $form_state->getValue('email'))
-        ->set('bypass_host', rtrim($form_state->getValue('bypass_host'), "/"))
-        ->set('client_ip_restore_enabled', $form_state->getValue('client_ip_restore_enabled'))
-        ->save();
-    }
-
+    $this->config->save();
   }
 
   /**
