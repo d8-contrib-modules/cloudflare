@@ -14,12 +14,14 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\cloudflare\CloudFlareStateInterface;
 use Drupal\cloudflare\CloudFlareZoneInterface;
+use Drupal\cloudflare\CloudFlareComposerDependencyCheckInterface;
 use Egulias\EmailValidator\EmailValidator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareException;
 use \InvalidArgumentException;
+use Drupal\cloudflare_zone_ui\Form\CloudFlareZoneSettingRenderer;
 
 /**
  * Class CloudFlareAdminSettingsForm.
@@ -64,6 +66,13 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
   protected $state;
 
   /**
+   * Checks that the composer dependencies for CloudFlare are met.
+   *
+   * @var \Drupal\cloudflare\CloudFlareComposerDependencyCheckInterface
+   */
+  protected $cloudFlareComposerDependencyCheck;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
@@ -72,7 +81,9 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       $container->get('cloudflare.state'),
       $container->get('cloudflare.zone'),
       $container->get('logger.factory')->get('cloudflare'),
-      new EmailValidator()
+      new EmailValidator(),
+      $container->get('cloudflare.composer_dependency_check')
+
     );
   }
 
@@ -90,12 +101,13 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
    * @param \Egulias\EmailValidator\EmailValidator $email_validator
    *   The email validator.
    */
-  public function __construct(ConfigFactoryInterface $config, CloudFlareStateInterface $state, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, EmailValidator $email_validator) {
+  public function __construct(ConfigFactoryInterface $config, CloudFlareStateInterface $state, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, EmailValidator $email_validator, CloudFlareComposerDependencyCheckInterface $check_interface) {
     $this->config = $config->getEditable('cloudflare.settings');
     $this->state = $state;
     $this->zoneApi = $zone_api;
     $this->logger = $logger;
     $this->emailValidator = $email_validator;
+    $this->cloudFlareComposerDependencyCheck = $check_interface;
   }
 
   /**
@@ -134,6 +146,13 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       '#description' => $this->t('Your API key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
       '#default_value' => $this->config->get('apikey'),
       '#required' => TRUE,
+      '#ajax' => array(
+        'callback' => [$this, 'buildZoneSelect'],
+        'wrapper' => 'zone-config-wrapper',
+        'method' => 'replace',
+        'effect' => 'fade',
+        'event' => 'click',
+      )
     ];
     $form['api_credentials_fieldset']['email'] = [
       '#type' => 'textfield',
@@ -141,6 +160,15 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       '#default_value' => $this->config->get('email'),
       '#required' => TRUE,
     ];
+
+    $form['api_credentials_fieldset']['zone_config'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'id' => 'zone-config-wrapper',
+      ),
+      '#tree' => TRUE,
+    );
+
     $form['cloudflare_config']['client_ip_restore_enabled'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Restore Client Ip Address'),
@@ -155,7 +183,33 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       '#default_value' => $this->config->get('bypass_host'),
     ];
 
-    return parent::buildForm($form, $form_state);
+    $form = parent::buildForm($form, $form_state);
+
+    if (!$this->cloudFlareComposerDependencyCheck->check()) {
+      drupal_set_message(t(CloudFlareComposerDependencyCheckInterface::ERROR_MESSAGE), 'error');
+
+      $form['api_credentials_fieldset']['apikey']['#disabled'] = TRUE;
+      $form['api_credentials_fieldset']['email']['#disabled'] = TRUE;
+      $form['cloudflare_config']['client_ip_restore_enabled']['#disabled'] = TRUE;
+      $form['cloudflare_config']['bypass_host']['#disabled'] = TRUE;
+      $form['cloudflare_config']['bypass_host']['#disabled'] = TRUE;
+      $form['actions']['submit']['#disabled'] = TRUE;
+    }
+
+    return $form;
+  }
+
+  /**
+   * Handles switching the selected backend plugin.
+   */
+  public function buildZoneSelect(array $form, FormStateInterface $form_state) {
+    // The work is already done in form(), where we rebuild the entity according
+    // to the current form values and then create the backend configuration form
+    // based on that. So we just need to return the relevant part of the form
+    // here.
+
+    $cloudflare_renderer = new CloudFlareZoneSettingRenderer($this->configFactory, $this->zoneApi, $this->logger);
+    return $cloudflare_renderer->buildZoneListing();
   }
 
   /**
@@ -164,6 +218,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $email = trim($form_state->getValue('email'));
     $apikey = trim($form_state->getValue('apikey'));
+    $zone_id = trim($form_state->getValue('zone_id'));
     $bypass_host = trim($form_state->getValue('bypass_host'));
     $is_email_valid = $this->emailValidator->isValid($email);
 
@@ -175,11 +230,10 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
     }
 
     try {
-      // Simply using this call to confirm that the creds can authenticate
-      // against the CloudFlareApi. An exception here tell us the creds are
-      // invalid.
-      $zone_api_direct->listZones();
-      $this->state->incrementApiRateCount();
+      // Simply using this call to confirm that the credentials can authenticate
+      // against the CloudFlareApi. An exception here tell us the credentials
+      // are invalid.
+      $zone_id = $this->getZoneId();
     }
 
     catch (\Exception $e) {
@@ -215,7 +269,6 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
 
     // Using the bare-metal-class here since the credentials have not yet been
     // added to the system.
-    $this->zoneApi = new ZoneApi($form_state->getValue('apikey'), $form_state->getValue('email'));
     $zone_id = $this->getZoneId();
     $api_key = trim($form_state->getValue('apikey'));
     $email = trim($form_state->getValue('email'));
@@ -226,11 +279,8 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
       ->set('email', $email)
       ->set('valid_credentials', TRUE)
       ->set('bypass_host', $bypass_host)
-      ->set('client_ip_restore_enabled', $client_ip_restore_enabled);
-
-    if ($zone_id) {
-      $this->config->set('zone', $zone_id);
-    }
+      ->set('client_ip_restore_enabled', $client_ip_restore_enabled)
+      ->set('zone', $zone_id);
 
     $this->config->save();
   }
@@ -245,6 +295,7 @@ class CloudFlareAdminSettingsForm extends ConfigFormBase implements ContainerInj
     // If there is no zone set and the account only has a single zone.
     try {
       $zones_from_api = $this->zoneApi->listZones();
+      $this->state->incrementApiRateCount();
     }
     catch (CloudFlareException $e) {
       $this->logger->error($e->getMessage());

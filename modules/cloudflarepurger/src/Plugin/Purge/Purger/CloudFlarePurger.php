@@ -9,6 +9,7 @@ namespace Drupal\cloudflarepurger\Plugin\Purge\Purger;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\cloudflare\CloudFlareStateInterface;
+use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Drupal\cloudflarepurger\EventSubscriber\CloudFlareCacheTagHeaderGenerator;
 use Drupal\purge\Plugin\Purge\Purger\PurgerBase;
 use Drupal\purge\Plugin\Purge\Purger\PurgerInterface;
@@ -25,7 +26,6 @@ use Psr\Log\LoggerInterface;
  *   id = "cloudflare",
  *   label = @Translation("CloudFlare"),
  *   description = @Translation("Purger for CloudFlare."),
- *   configform = "Drupal\cloudflare\Form\CloudFlareAdminSettingsForm",
  *   types = {"tag", "url", "everything"},
  *   multi_instance = FALSE,
  * )
@@ -68,6 +68,13 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
   protected $zone;
 
   /**
+   * TRUE if composer dependencies are met.  False otherwise.
+   *
+   * @var bool
+   */
+  protected $areCloudflareComposerDepenciesMet;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -77,7 +84,8 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
       $plugin_definition,
       $container->get('config.factory'),
       $container->get('cloudflare.state'),
-      $container->get('logger.factory')->get('cloudflare')
+      $container->get('logger.factory')->get('cloudflare'),
+      $container->get('cloudflare.composer_dependency_check')
     );
   }
 
@@ -96,24 +104,19 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
    *   Tracks limits associated with CloudFlare Api.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
+   * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $checker
+   *   Tests that composer dependencies are met.
    *
    * @throws \LogicException
    *   Thrown if $configuration['id'] is missing, see Purger\Service::createId.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config, CloudFlareStateInterface $state, LoggerInterface $logger) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactoryInterface $config, CloudFlareStateInterface $state, LoggerInterface $logger, CloudFlareComposerDependenciesCheckInterface $checker) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->config = $config->get('cloudflare.settings');
     $this->state = $state;
     $this->logger = $logger;
-
-    // This is a unique case where the ApiSdk is being accessed directly and not
-    // via a service.  Purging should only ever happen through the purge module
-    // which is why this is NOT in a service.
-    $api_key = $this->config->get('apikey');
-    $email = $this->config->get('email');
-    $this->zone = $this->config->get('zone');
-    $this->zoneApi = new ZoneApi($api_key, $email);
+    $this->areCloudflareComposerDepenciesMet = $checker->check();
   }
 
   /**
@@ -134,6 +137,12 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
    */
   public function invalidate(array $invalidations) {
     $chunks = array_chunk($invalidations, CloudFlareAPI::MAX_TAG_PURGES_PER_REQUEST);
+
+    $has_invalidations = count($invalidations) > 0;
+    if (!$has_invalidations) {
+      return;
+    }
+
     foreach ($chunks as $chunk) {
       $this->purgeChunk($chunk);
     }
@@ -159,6 +168,14 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
    *   Chunk of purge module invalidation objects to purge via CloudFlare.
    */
   private function purgeChunk(array &$invalidations) {
+    // This is a unique case where the ApiSdk is being accessed directly and not
+    // via a service.  Purging should only ever happen through the purge module
+    // which is why this is NOT in a service.
+    $api_key = $this->config->get('apikey');
+    $email = $this->config->get('email');
+    $this->zone = $this->config->get('zone_id');
+    $this->zoneApi = new ZoneApi($api_key, $email);
+
     $api_targets_to_purge = [];
 
     // This method is unfortunately a bit verbose due to the fact that we
@@ -166,6 +183,12 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
     foreach ($invalidations as $invalidation) {
       $invalidation->setState(InvalidationInterface::PROCESSING);
       $api_targets_to_purge[] = $invalidation->getExpression();
+    }
+
+    if (!$this->areCloudflareComposerDepenciesMet) {
+      foreach ($invalidations as $invalidation) {
+        $invalidation->setState(InvalidationInterface::FAILED);
+      }
     }
 
     try {
@@ -180,6 +203,7 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
 
         $this->zoneApi->purgeTags($this->zone, $tags);
         $this->state->incrementTagPurgeDailyCount();
+
       }
 
       elseif ($invalidation_type == 'url') {
@@ -197,9 +221,12 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
 
     catch (\Exception $e) {
       foreach ($invalidations as $invalidation) {
-        $this->logger->error($e->getMessage());
         $invalidation->setState(InvalidationInterface::FAILED);
       }
+
+      // We only want to log a single watchdog error per request. This prevents
+      // the log from being flooded.
+      $this->logger->error($e->getMessage());
     }
 
     finally {

@@ -1,8 +1,20 @@
 cloudflare.admin_settings_form:
   path: '/admin/config/services/cloudflare'
-  parent: system.admin_config_services
   defaults:
-    _form: '\Drupal\cloudflare\Form\CloudFlareAdminSettingsForm'
-    _title: 'CloudFlare API Credentials'
+    _wizard: '\Drupal\cloudflare\Wizard\ConfigWizard'
+    _title: 'CloudFlare Settings'
+    tempstore_id: 'cloudflare.wizard.settings'
+    machine_name: 'CloudFlareSettings'
   requirements:
+    _access: 'TRUE'
+    _permission: 'access administration pages'
+cloudflare.admin_settings_form.step:
+  path: '/admin/config/services/cloudflare/{step}'
+  defaults:
+    _wizard: '\Drupal\cloudflare\Wizard\ConfigWizard'
+    _title: 'Wizard Test'
+    tempstore_id: 'cloudflare.wizard.settings'
+    machine_name: 'CloudFlareSettings'
+  requirements:
+    _access: 'TRUE'
     _permission: 'access administration pages'

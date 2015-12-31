@@ -8,6 +8,8 @@
 namespace Drupal\cloudflare;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\cloudflare\CloudFlareComposerDependencyCheckInterface;
+use Drupal\cloudflare\Exception\ComposerDependencyException;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
 use CloudFlarePhpSdk\Exceptions\CloudFlareException;
@@ -62,19 +64,36 @@ class Zone implements CloudFlareZoneInterface {
   protected $validCredentials;
 
   /**
+   * Checks that the composer dependencies for CloudFlare are met.
+   *
+   * @var \Drupal\cloudflare\CloudFlareComposerDependencyCheckInterface
+   */
+  protected $cloudFlareComposerDependencyCheck;
+
+  /**
    * {@inheritdoc}
    */
-  public static function create(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state) {
+  public static function create(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state,  CloudFlareComposerDependencyCheckInterface $check_interface) {
     $cf_config = $config->get('cloudflare.settings');
     $api_key = $cf_config->get('apikey');
     $email = $cf_config->get('email');
-    $zoneapi = new ZoneApi($api_key, $email);
+
+    // If someone has not correctly installed composer here is where we need to
+    // handle it to prevent PHP error.
+    try {
+      $check_interface->assert();
+      $zoneapi = new ZoneApi($api_key, $email);
+    }
+    catch (ComposerDependencyException $e) {
+      $zoneapi = NULL;
+    }
 
     return new static(
       $config,
       $logger,
       $state,
-      $zoneapi
+      $zoneapi,
+      $check_interface
     );
   }
 
@@ -90,19 +109,22 @@ class Zone implements CloudFlareZoneInterface {
    * @param \CloudFlarePhpSdk\ApiEndpoints\ZoneApi $zone_api
    *   ZoneApi instance for accessing api.
    */
-  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state, ZoneApi $zone_api) {
+  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state,  $zone_api,  CloudFlareComposerDependencyCheckInterface $check_interface) {
     $this->config = $config->get('cloudflare.settings');
     $this->logger = $logger;
     $this->state = $state;
     $this->zoneApi = $zone_api;
     $this->zone = $this->config->get('zone');
     $this->validCredentials = $this->config->get('valid_credentials');
+    $this->cloudFlareComposerDependencyCheck = $check_interface;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getZoneSettings() {
+    $this->cloudFlareComposerDependencyCheck->assert();
+
     if (!$this->validCredentials) {
       return NULL;
     }
@@ -122,6 +144,8 @@ class Zone implements CloudFlareZoneInterface {
    * {@inheritdoc}
    */
   public function updateZoneSettings(ZoneSettings $zone_settings) {
+    $this->cloudFlareComposerDependencyCheck->assert();
+
     if (!$this->validCredentials) {
       return;
     }
@@ -140,7 +164,9 @@ class Zone implements CloudFlareZoneInterface {
    * {@inheritdoc}
    */
   public function listZones() {
+    $this->cloudFlareComposerDependencyCheck->assert();
     $zones = [];
+
     try {
       $zones = $this->zoneApi->listZones();
       $this->state->incrementApiRateCount();

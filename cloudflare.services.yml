@@ -1,4 +1,10 @@
 services:
+  cloudflare.composer_dependency_check:
+    class: Drupal\cloudflare\ComposerDependenciesCheck
+    factory: Drupal\cloudflare\ComposerDependenciesCheck::create
+    arguments: ['@logger.channel.cloudflare']
+    tags:
+      - { name: cloudflare}
   cloudflare.timestamp:
     class: Drupal\cloudflare\Timestamp
   cloudflare.state:
@@ -9,7 +15,7 @@ services:
   cloudflare.zone:
     class: Drupal\cloudflare\Zone
     factory: Drupal\cloudflare\Zone::create
-    arguments: ['@config.factory', '@logger.channel.cloudflare', '@cloudflare.state']
+    arguments: ['@config.factory', '@logger.channel.cloudflare', '@cloudflare.state', '@cloudflare.composer_dependency_check']
     tags:
       - { name: cloudflare}
   logger.channel.cloudflare:

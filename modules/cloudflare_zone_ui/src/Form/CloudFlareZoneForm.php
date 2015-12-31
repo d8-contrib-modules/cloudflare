@@ -7,6 +7,8 @@
 
 namespace Drupal\cloudflare_zone_ui\Form;
 
+use Drupal\cloudflare\Exception\ComposerDependencyException;
+use Drupal\cloudflare\CloudFlareComposerDependencyCheckInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -114,6 +116,12 @@ class CloudFlareZoneForm extends ConfigFormBase {
     // meaningful feedback to the user.
     catch (CloudFlareException $e) {
       drupal_set_message("Unable to connect to CloudFlare. " . $e->getMessage(), 'error');
+      $form['zone']['#access'] = FALSE;
+      return;
+    }
+
+    catch (ComposerDependencyException $e){
+      drupal_set_message(t(CloudFlareComposerDependencyCheckInterface::ERROR_MESSAGE), 'error');
       $form['zone']['#access'] = FALSE;
       return;
     }
