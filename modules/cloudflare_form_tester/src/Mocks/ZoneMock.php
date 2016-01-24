@@ -212,7 +212,7 @@ class ZoneMock implements CloudFlareZoneInterface {
   /**
    * Tells the mock to return multiple zones.
    *
-   * @param bool $assert_valid_credentials
+   * @param bool $multi_zone
    *   TRUE to mock multipleZones.  FALSE for singlezone.
    */
   public static function mockMultiZoneAccount($multi_zone) {

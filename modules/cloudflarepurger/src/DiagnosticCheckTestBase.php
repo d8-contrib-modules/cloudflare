@@ -73,7 +73,7 @@ abstract class DiagnosticCheckTestBase extends UnitTestCase {
     $this->composerDependencyStub->expects($this->any())
       ->method('check')
       ->will($this->returnValue(TRUE));
-    $this->container->set('cloudflare.composer_dependency_check',  $this->composerDependencyStub);
+    $this->container->set('cloudflare.composer_dependency_check', $this->composerDependencyStub);
 
     \Drupal::setContainer($this->container);
   }

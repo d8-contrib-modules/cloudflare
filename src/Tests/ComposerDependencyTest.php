@@ -8,7 +8,6 @@
 namespace Drupal\cloudflare\Tests;
 
 use Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock;
-use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Drupal\Core\Url;
 use Drupal\simpletest\WebTestBase;
 

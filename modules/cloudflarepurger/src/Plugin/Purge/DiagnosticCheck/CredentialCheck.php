@@ -7,7 +7,6 @@
 
 namespace Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck;
 
-use Drupal\Core\Url;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckBase;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
