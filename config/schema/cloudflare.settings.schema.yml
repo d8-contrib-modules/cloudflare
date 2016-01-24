@@ -1,0 +1,29 @@
+ # Schema for the configuration files of the CloudFlare module.
+cloudflare.settings:
+  type: config_object
+  label: 'CloudFlare Config'
+  mapping:
+    client_ip_restore_enabled:
+      label: 'Restore Client Ip Address.'
+      type: boolean
+      translatable: false
+    bypass_host:
+      label: 'Host to Bypass CloudFlare.  Helps suppress log warnings regarding requests bypassing CloudFlare.'
+      type: string
+      translatable: false
+    valid_credentials:
+      label: 'Indicator that user entered credentials are valid.'
+      type: boolean
+      translatable: false
+    zone_id:
+      type: string
+      label: 'CloudFlare ZoneId corresponding to the site domain.'
+      translatable: false
+    apikey:
+      type: string
+      label: 'ApiKey used to authenticate against CloudFlare'
+      translatable: false
+    email:
+      type: string
+      label: 'Email used to authenticate against CloudFlare.'
+      translatable: false
