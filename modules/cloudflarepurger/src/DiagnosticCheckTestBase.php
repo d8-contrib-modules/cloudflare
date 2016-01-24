@@ -49,6 +49,13 @@ abstract class DiagnosticCheckTestBase extends UnitTestCase {
   protected $timestampStub;
 
   /**
+   * Provides check for composer dependencies.
+   *
+   * @var \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface
+   */
+  protected $composerDependencyStub;
+
+  /**
    * {@inheritdoc}
    */
   public function setUp() {
@@ -61,6 +68,13 @@ abstract class DiagnosticCheckTestBase extends UnitTestCase {
 
     $this->container = new ContainerBuilder();
     $this->container->set('string_translation', $this->getStringTranslationStub());
+
+    $this->composerDependencyStub = $this->getMock('\Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface');
+    $this->composerDependencyStub->expects($this->any())
+      ->method('check')
+      ->will($this->returnValue(TRUE));
+    $this->container->set('cloudflare.composer_dependency_check',  $this->composerDependencyStub);
+
     \Drupal::setContainer($this->container);
   }
 

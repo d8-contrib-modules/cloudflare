@@ -33,7 +33,7 @@ class ApiRateLimitCheckTest extends DiagnosticCheckTestBase {
     $this->drupalState->set(State::API_RATE_COUNT, $api_rate);
     $this->drupalState->set(State::API_RATE_COUNT_START, new DateTime());
 
-    $api_rate_limit_check = new ApiRateLimitCheck([], '23123', 'this is a definition', $this->cloudflareState);
+    $api_rate_limit_check = new ApiRateLimitCheck([], '23123', 'this is a definition', $this->cloudflareState, $this->composerDependencyStub);
     $actual_severity = $api_rate_limit_check->run();
     $this->assertEquals($expected_severity, $actual_severity);
   }
