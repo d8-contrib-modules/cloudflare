@@ -44,7 +44,7 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
     $this->route = Url::fromRoute('cloudflare.admin_settings_form');
     $this->drupalLogin($this->adminUser);
     ZoneMock::mockAssertValidCredentials(TRUE);
-
+    ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
   }
 
   /**

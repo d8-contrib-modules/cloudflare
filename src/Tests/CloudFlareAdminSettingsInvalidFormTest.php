@@ -44,6 +44,7 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
 
     $this->adminUser = $this->drupalCreateUser(['access administration pages']);
     $this->route = Url::fromRoute('cloudflare.admin_settings_form');
+    ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
   }
 
 
