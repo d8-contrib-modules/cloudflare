@@ -8,12 +8,12 @@
 namespace Drupal\cloudflare;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Drupal\cloudflare\Exception\ComposerDependencyException;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
 use CloudFlarePhpSdk\Exceptions\CloudFlareException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Zone methods for CloudFlare.
@@ -178,6 +178,25 @@ class Zone implements CloudFlareZoneInterface {
       throw $e;
     }
     return $zones;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function assertValidCredentials($apikey, $email, CloudFlareComposerDependenciesCheckInterface $composer_dependency_check, CloudFlareStateInterface $state) {
+    $composer_dependency_check->assert();
+    $zone_api_direct = new ZoneApi($apikey, $email);
+
+    try {
+      $zones = $zone_api_direct->listZones();
+    }
+    catch (Exception $e) {
+      throw $e;
+    }
+    finally {
+      $state->incrementApiRateCount();
+    }
+
   }
 
 }
