@@ -66,18 +66,9 @@ class CredentialCheck extends DiagnosticCheckBase implements DiagnosticCheckInte
    */
   public function run() {
     $has_valid_credentials = $this->config->get('valid_credentials');
-    $has_zone_id = !empty($this->config->get('zone_id'));
 
     if (!$has_valid_credentials) {
       $this->recommendation = $this->t("Invalid Api credentials.");
-      return SELF::SEVERITY_ERROR;
-    }
-
-    if (!$has_zone_id) {
-      $link_to_settings = Url::fromRoute('cloudflare.admin_settings_form')->toString();
-      $message = $this->t('No default zone has been entered for CloudFlare. Please go <a href="@link_to_settings">here</a> to set.', ['@link_to_settings' => $link_to_settings]);
-
-      $this->recommendation = $this->t("$message");
       return SELF::SEVERITY_ERROR;
     }
 
