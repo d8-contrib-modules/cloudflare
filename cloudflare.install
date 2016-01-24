@@ -36,3 +36,13 @@ function cloudflare_requirements($phase) {
   }
   return $requirements;
 }
+
+/**
+ * Installs ctools module.  Uninstalls cloudflare_zone_ui.
+ */
+function cloudflare_update_8001(&$sandbox) {
+  \Drupal::service('module_installer')->install(['ctools']);
+  if (\Drupal::moduleHandler()->moduleExists('cloudflare_zone_ui')) {
+    \Drupal::service('module_installer')->uninstall([('cloudflare_zone_ui')]);
+  }
+}
