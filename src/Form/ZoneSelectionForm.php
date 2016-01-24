@@ -41,9 +41,13 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
+    // This is a hack because could not get custom ServiceProvider to work.
+    // this to work: https://www.drupal.org/node/2026959
+    $has_zone_mock = $container->has('cloudflare.zonemock');
+
     return new static(
       $container->get('config.factory'),
-      $container->get('cloudflare.zone'),
+      $has_zone_mock ? $container->get('cloudflare.zonemock') : $container->get('cloudflare.zone'),
       $container->get('logger.factory')->get('cloudflare'),
       $container->get('cloudflare.composer_dependency_check')
     );
@@ -153,19 +157,13 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
     $form_select_field = [
       '#type' => 'select',
       '#title' => $this->t('Zone'),
-      '#disabled' => TRUE,
+      '#disabled' => FALSE,
       '#options' => $zone_select,
-      '#description' => $this->t('Your CloudFlare account has a single zone which has been automatically selected for you.  Simply click "Finish" to save your settings.'),
+      '#description' => $this->t('Select the top level domain/zone for the current site.'),
       '#default_value' => $this->config->get('zone_id'),
       '#empty_option' => '- None -',
       '#empty_value' => '0',
     ];
-
-    if (!$this->hasMultipleZones) {
-      $form_select_field['#disabled'] = FALSE;
-      $form_select_field['#description'] = $this->t('Select the top level domain/zone for the current site.');
-
-    }
 
     return $form_select_field;
   }

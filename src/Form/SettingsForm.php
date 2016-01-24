@@ -18,7 +18,6 @@ use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Egulias\EmailValidator\EmailValidator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\Exceptions\CloudFlareException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareInvalidCredentialException;
@@ -94,14 +93,19 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
+    // This is a hack because could not get custom ServiceProvider to work.
+    // this to work: https://www.drupal.org/node/2026959
+    $has_zone_mock = $container->has('cloudflare.zonemock');
+    $has_composer_mock = $container->has('cloudflare.composer_dependency_checkmock');
+
     return new static(
       $container->get('config.factory'),
       $container->get('cloudflare.state'),
-      $container->get('cloudflare.zone'),
+
+      $has_zone_mock ? $container->get('cloudflare.zonemock') : $container->get('cloudflare.zone'),
       $container->get('logger.factory')->get('cloudflare'),
       new EmailValidator(),
-      $container->get('cloudflare.composer_dependency_check')
-
+      $has_composer_mock ? $container->get('cloudflare.composer_dependency_checkmock') : $container->get('cloudflare.composer_dependency_check')
     );
   }
 
@@ -127,6 +131,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
     $this->logger = $logger;
     $this->emailValidator = $email_validator;
     $this->cloudFlareComposerDependenciesMet = $check_interface->check();
+    $this->cloudFlareComposerDependenciesCheck = $check_interface;
     $this->hasZoneId = !empty($this->config->get('zone_id'));
     $this->hasValidCredentials = $this->config->get('valid_credentials') === TRUE;
 
@@ -298,12 +303,6 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
     $bypass_host = trim($form_state->getValue('bypass_host'));
     $is_email_valid = $this->emailValidator->isValid($email);
 
-    // For diagnostic purposes using the bare-metal Api class here instead of
-    // the Drupal Zone container.  This is because the container requires that
-    // the credentials be stored in config.  The bare class allows us to avoid
-    // saving potentially invalid settings to config.
-    $zone_api_direct = new ZoneApi($apikey, $email);
-
     if (!$is_email_valid) {
       $form_state->setErrorByName('email', $this->t('Please enter a valid e-mail address.'));
       return;
@@ -313,10 +312,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
       // Simply using this call to confirm that the credentials can authenticate
       // against the CloudFlareApi. An exception here tell us the credentials
       // are invalid.
-      $zone_api_direct->listZones();
-
-      // The CloudFlare Api itself cannot do rate tracking.
-      $this->state->incrementApiRateCount();
+      $this->zoneApi->assertValidCredentials($apikey, $email, $this->cloudFlareComposerDependenciesCheck, $this->state);
     }
     catch (CloudFlareTimeoutException $e) {
       $message = 'Unable to connect to CloudFlare in order to validate credentials.  Connection timed out.  Please try again later.';
@@ -325,7 +321,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
       return;
     }
     catch (CloudFlareInvalidCredentialException $e) {
-      $form_state->setErrorByName('apikey', $this->t('Unfortunately your credentials failed to authenticate against the CloudFlare API.  Please enter valid credentials.'));
+      $form_state->setErrorByName('apiKey', $e->getMessage());
       return;
     }
     catch (CloudFlareException $e) {
