@@ -23,7 +23,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  *
  * @group cloudflare
  *
- * @covers \Drupal\cloudflare\EventSubscriber\ClientIpRestore
+ * @covers \Drupal\cloudflare\EventSubscriber\ClientIpRestffore
  */
 class ClientIpRestoreTest extends UnitTestCase {
   use StringTranslationTrait;
