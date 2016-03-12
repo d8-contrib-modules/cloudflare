@@ -7,7 +7,6 @@
 
 namespace Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck;
 
-use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckBase;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
 use Drupal\cloudflare\CloudFlareStateInterface;
@@ -18,6 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Checks that the site is within CloudFlare's daily tag purge rate limit.
  *
  * CloudFlare currently has a rate limit of 200 tag purges/day.
+ *
  * @todo We hope this limit is raised soon!
  *
  * @see https://support.cloudflare.com/hc/en-us/articles/206596608-How-to-Purge-Cache-Using-Cache-Tags

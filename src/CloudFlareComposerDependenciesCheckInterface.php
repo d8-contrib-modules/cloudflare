@@ -8,7 +8,7 @@
 namespace Drupal\cloudflare;
 
 /**
- * Tests that composer dependencies for CloudFlare are met.
+ * Tests that Composer dependencies for CloudFlare are met.
  */
 interface CloudFlareComposerDependenciesCheckInterface {
   const ERROR_MESSAGE = "Missing Composer dependencies for CloudFlare. <br /> From the root of your site install composer dependencies by running `composer require d8-contrib-modules/cloudflarephpsdk \"1.0.0-alpha2\"`";

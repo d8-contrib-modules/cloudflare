@@ -9,7 +9,11 @@ namespace Drupal\cloudflare\Wizard;
 use Drupal\ctools\Wizard\FormWizardBase;
 
 /**
- * Class ConfigWizard.
+ * Class ConfigWizard used for entering CloudFlare config.
+ *
+ * The wizard apperoach is used because a user first must enter their
+ * credentials before selecting a zone. The different pages of a wizard
+ * supports this workflow.
  */
 class ConfigWizard extends FormWizardBase {
   /**

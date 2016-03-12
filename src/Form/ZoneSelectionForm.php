@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\cloudflare\Form\CloudFlareAdminSettingsForm.
+ * Contains Drupal\cloudflare\Form\ZoneSelectionForm.
  */
 
 namespace Drupal\cloudflare\Form;
@@ -12,13 +12,12 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\cloudflare\CloudFlareZoneInterface;
-use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException;
 
 /**
- * Class CloudFlareAdminSettingsForm.
+ * Class ZoneSelectionForm.
  *
  * @package Drupal\cloudflare\Form
  */
@@ -49,12 +48,12 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
       $container->get('config.factory'),
       $has_zone_mock ? $container->get('cloudflare.zonemock') : $container->get('cloudflare.zone'),
       $container->get('logger.factory')->get('cloudflare'),
-      $container->get('cloudflare.composer_dependency_check')
+      $container->get('cloudflare.composer_dependency_check')->check()
     );
   }
 
   /**
-   * Constructs a new CloudFlareAdminSettingsForm.
+   * Constructs a new ZoneSelectionForm.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The factory for configuration objects.
@@ -62,26 +61,26 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
    *   ZoneApi instance for accessing api.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
-   * @param \Drupal\cloudflare\Form\CloudFlareComposerDependenciesCheckInterface $check_interface
-   *   Checks for composer dependencies.
+   * @param bool $composer_dependencies_met
+   *   Checks that the composer dependencies for CloudFlare are met.
    */
-  public function __construct(ConfigFactoryInterface $config, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, CloudFlareComposerDependenciesCheckInterface $check_interface) {
+  public function __construct(ConfigFactoryInterface $config, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, $composer_dependencies_met) {
     $this->configFactory = $config;
     $this->config = $config->getEditable('cloudflare.settings');
     $this->zoneApi = $zone_api;
     $this->logger = $logger;
-    $this->cloudFlareComposerDependenciesMet = $check_interface->check();
+    $this->cloudFlareComposerDependenciesMet = $composer_dependencies_met;
     $this->hasZoneId = !empty($this->config->get('zone_id'));
     $this->hasValidCredentials = $this->config->get('valid_credentials') === TRUE;
 
     // This test should be unnecessary since this form should only ever be
-    // reached when the 2 conditions are met.
+    // reached when the 2 conditions are met. It's being done from an abundance
+    // of caution.
     if ($this->hasValidCredentials && $this->cloudFlareComposerDependenciesMet) {
       try {
         $this->zones = $this->zoneApi->listZones();
         $this->hasMultipleZones = count($this->zones) > 1;
       }
-
       catch (CloudFlareTimeoutException $e) {
         drupal_set_message("Unable to connect to CloudFlare. You will not be able to change the selected Zone.", 'error');
       }

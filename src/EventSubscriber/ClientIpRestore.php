@@ -70,7 +70,7 @@ class ClientIpRestore implements EventSubscriberInterface {
   protected $isClientIpRestoreEnabled;
 
   /**
-   * Constructs a UpdateFetcher.
+   * Constructs a ClientIpRestore.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config
    *   The factory for configuration objects.

@@ -21,13 +21,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use CloudFlarePhpSdk\Exceptions\CloudFlareException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareInvalidCredentialException;
-
-
 use \InvalidArgumentException;
 
 
 /**
- * Class CloudFlareAdminSettingsForm.
+ * Class SettingsForm.
  *
  * @package Drupal\cloudflare\Form
  */
@@ -94,7 +92,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
    */
   public static function create(ContainerInterface $container) {
     // This is a hack because could not get custom ServiceProvider to work.
-    // this to work: https://www.drupal.org/node/2026959
+    // See: https://www.drupal.org/node/2026959
     $has_zone_mock = $container->has('cloudflare.zonemock');
     $has_composer_mock = $container->has('cloudflare.composer_dependency_checkmock');
 
@@ -122,6 +120,8 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
    *   A logger instance.
    * @param \Egulias\EmailValidator\EmailValidator $email_validator
    *   The email validator.
+   * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $check_interface
+   *   Checks if composer dependencies are met.
    */
   public function __construct(ConfigFactoryInterface $config, CloudFlareStateInterface $state, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, EmailValidator $email_validator, CloudFlareComposerDependenciesCheckInterface $check_interface) {
     $this->configFactory = $config;
@@ -177,7 +177,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
 
     // Form elements are being disabled after parent::buildForm because:
     // 1: parent::buildForm creates the submit button
-    // 2: we want to disable the submit button.
+    // 2: we want to disable the submit button since dependencies unmet.
     if (!$this->cloudFlareComposerDependenciesMet) {
       drupal_set_message($this->t(CloudFlareComposerDependenciesCheckInterface::ERROR_MESSAGE), 'error');
 
@@ -330,12 +330,12 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
     }
 
     try {
-      $has_http = strpos($bypass_host, 'http') > -1;
-      if ($has_http) {
+      $has_http_or_https = strpos($bypass_host, 'http') > -1;
+      if ($has_http_or_https) {
         $form_state->setErrorByName('$bypass_host', $this->t('Please enter a host without http/https'));
       }
 
-      // Quick and easy way to validate the Domain.
+      // Quick and easy way to validate the domain.
       if (!empty($bypass_host)) {
         $bypass_uri = 'http://' . $bypass_host;
         Url::fromUri($bypass_uri);
@@ -355,6 +355,8 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $api_key = trim($form_state->getValue('apikey'));
     $email = trim($form_state->getValue('email'));
+
+    // Deslash the host url.
     $bypass_host = trim(rtrim($form_state->getValue('bypass_host'), "/"));
     $client_ip_restore_enabled = $form_state->getValue('client_ip_restore_enabled');
 
