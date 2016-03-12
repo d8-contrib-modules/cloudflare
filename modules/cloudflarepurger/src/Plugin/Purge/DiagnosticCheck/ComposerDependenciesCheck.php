@@ -13,7 +13,7 @@ use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Checks that the CloudFlareApi Dependency is installed on the system.
+ * Checks that the CloudFlareApi Composer Dependency is installed on the system.
  *
  * Prevents Purge module from attempting to purge.
  *
@@ -34,7 +34,7 @@ class ComposerDependenciesCheck extends DiagnosticCheckBase implements Diagnosti
   protected $areCloudFlareComposerDependenciesMet;
 
   /**
-   * Constructs a CloudFlareApiRateLimitCheck diagnostic check object.
+   * Constructs a ComposerDependenciesCheck diagnostic check object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.

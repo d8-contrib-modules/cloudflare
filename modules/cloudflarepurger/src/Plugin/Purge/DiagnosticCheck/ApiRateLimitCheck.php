@@ -17,7 +17,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Checks that the site is within CloudFlare's API rate limits.
  *
- * @todo We hope that one day this limit goes away.
  * CloudFlare currently has a rate limit of 1200 Api calls every 5 minutes.
  *
  * @see https://api.cloudflare.com/#requests
@@ -25,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @PurgeDiagnosticCheck(
  *   id = "cloudflare_api_rate_limit_check",
  *   title = @Translation("CloudFlare - Api Rate limit check."),
- *   description = @Translation("Checks that the site is not violating CloudFlare's Api purge limit."),
+ *   description = @Translation("Checks that the site is not violating CloudFlare's overall Api rate limit."),
  *   dependent_queue_plugins = {},
  *   dependent_purger_plugins = {"cloudflare"}
  * )
@@ -40,14 +39,14 @@ class ApiRateLimitCheck extends DiagnosticCheckBase implements DiagnosticCheckIn
   protected $state;
 
   /**
-   * Checks that the composer dependencies for CloudFlare are met.
+   * Checks that the Composer dependencies for CloudFlare are met.
    *
    * @var \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface
    */
   protected $cloudFlareComposerDependenciesCheck;
 
   /**
-   * Constructs a CloudFlareApiRateLimitCheck diagnostic check object.
+   * Constructs a ApiRateLimitCheck diagnostic check object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
