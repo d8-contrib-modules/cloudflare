@@ -33,6 +33,10 @@ function cloudflare_requirements($phase) {
         'description' => $message,
       );
     }
+    if (\Drupal::moduleHandler()->moduleExists('cloudflare_zone_ui')) {
+      \Drupal::service('module_installer')->uninstall([('cloudflare_zone_ui')]);
+    }
+
   }
   return $requirements;
 }
@@ -42,7 +46,4 @@ function cloudflare_requirements($phase) {
  */
 function cloudflare_update_8001(&$sandbox) {
   \Drupal::service('module_installer')->install(['ctools']);
-  if (\Drupal::moduleHandler()->moduleExists('cloudflare_zone_ui')) {
-    \Drupal::service('module_installer')->uninstall([('cloudflare_zone_ui')]);
-  }
 }
