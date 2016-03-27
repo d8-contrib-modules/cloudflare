@@ -7,7 +7,7 @@
   "license": "GPL-2.0+",
   "minimum-stability": "dev",
   "require": {
-    "d8-contrib-modules/cloudflarephpsdk": "1.0.0-alpha2"
+    "d8-contrib-modules/cloudflarephpsdk": "1.0.0-alpha3"
   },
   "require-dev": {
     "drupal/coder":                 "8.2.*",

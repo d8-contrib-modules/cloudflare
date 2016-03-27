@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Checks that the site is within CloudFlare's daily tag purge rate limit.
  *
- * CloudFlare currently has a rate limit of 200 tag purges/day.
+ * CloudFlare currently has a rate limit of 2000 tag purges/day.
  *
  * @todo We hope this limit is raised soon!
  *

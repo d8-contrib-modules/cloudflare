@@ -24,4 +24,4 @@ drush dl ctools purge -y
 
 # Install composer dependency
 cd "$DRUPAL_TI_DRUPAL_DIR"
-composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha2"
+composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"

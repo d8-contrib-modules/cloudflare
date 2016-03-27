@@ -45,7 +45,7 @@ CloudFlare API.  You can check it out [here](https://github.com/d8-contrib-modul
 ## Getting Started
 - `drush dl cloudflare purge ctools purge_queuer_url --yes`
 -  From the root of your site run install composer dependencies:
-   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha2"`
+   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"`
 - To install: `drush en cloudflare cloudflarepurger purge purge_ui purge_drush purge_queuer_coretags purge_processor_cron --yes`
 - *Note*: If you try to install purge, cloudflare and cloudflare_purger all at once via the UI you will get a one time error on install.  This is known issue that is impacting other D8 modules. See
  [here](https://www.drupal.org/node/1387438)
@@ -71,7 +71,7 @@ CloudFlare API.  You can check it out [here](https://github.com/d8-contrib-modul
 ## Getting Started (Experimental Cache Tag Support: Enterprise Tier ONLY)
 - `drush dl cloudflare purge ctools --yes`
 -  From the root of your site run install composer dependencies:
-   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha2"`
+   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"`
 - To install: `drush en cloudflare cloudflarepurger purge purge_ui purge_drush purge_queuer_coretags purge_processor_cron --yes`
 - *Note*: If you try to install purge, cloudflare and cloudflare_purger all at once via the UI you will get a one time error on install.  This is known issue that is impacting other D8 modules. See
  [here](https://www.drupal.org/node/1387438)
