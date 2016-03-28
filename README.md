@@ -5,7 +5,12 @@ The CloudFlare module provides integration with the CloudFlare CDN using the Clo
 
 Special thanks to Wim Leers and Niels Van Mourik for their collaboration and support on all things cache and purge!
 
-## NOTE TO THOSE ON CLOUDFLARE FREE TIER UPGRADING TO THE LASTEST VERSION OF MODULE
+## Note to those updating from earlier version
+You will need to update your composer dependencies:
+-   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"`
+- You will also need to update to the most recent version of the Purge module.
+
+## Note to those on CloudFlare Free Tier
 CloudFlare has limited support for tag clearing to their enterprise tier. To switch to path based purging you will need to:
 - uninstall purge_queuer_coretags: `drush dis purge_queuer_coretags`
 - install purge_queuer_url  `drush en purge_queuer_url`
@@ -16,7 +21,7 @@ CloudFlare has limited support for tag clearing to their enterprise tier. To swi
 - Empty CloudFlare's cache.
 
 ## Current Features
-- Cache clearing by Path (Recommended) and Tag (Experimental).
+- Cache clearing by Path (Recommended For Free and Professional) and Tag (Enterprise).
 - Restore client's original IP address.
 
 ## Support
@@ -103,12 +108,12 @@ module has experimental support for Tags (it will still work with path based pur
 ## Disclaimers
 
 ### API Rate Limit (Enterprise)
-The current CloudFlare API only supports 200 tag purge requests/day which makes it unsuitable for a production site.  It's our hope that the limit will be raised in the near future.
+The current CloudFlare API only supports 2000 tag purge requests/day.  This number is suitable for some but not ALL sites.  It's our hope that the limit will be raised in the near future.
 
 ### Cache Tag Header Size
 Currently CloudFlare does not support 16k cache tag headers which are necessary for taking full advantage of [D8's cache tag system](https://www.drupal.org/developing/api/8/cache/tags).
 
-The current module and CloudFlare itself use a bloom-filter based approach to work around this limitation. They limit the number of possible cache tags to 4096. However, that means that purging one tag can result in other tags and therefore pages being inadvertently purged.  This makes the module unsuitable for high-traffic events.
+The current module uses a bloom-filter based approach to work around this limitation. They limit the number of possible cache tags to 4096. However, that means that purging one tag can result in other tags and therefore pages being inadvertently purged.  This makes the module unsuitable for high-traffic events.
 
 ### Varnish
 The CloudFlare purger has been built as a plugin to the [Purge](https://www.drupal.org/project/purge) module.  
