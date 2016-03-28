@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\purge\Plugin\PurgeDiagnosticCheck\CloudFlareCredentialCheck.
+ * Contains \Drupal\purge\Plugin\PurgeDiagnosticCheck\CredentialCheck.
  */
 
 namespace Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck;
@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @PurgeDiagnosticCheck(
  *   id = "cloudflare_creds",
  *   title = @Translation("CloudFlare - Credentials"),
- *   description = @Translation("Checks to see if the credentials for CloudFlare are valid."),
+ *   description = @Translation("Checks to see if the supplied account credentials for CloudFlare are valid."),
  *   dependent_queue_plugins = {},
  *   dependent_purger_plugins = {"cloudflare"}
  * )
@@ -32,7 +32,7 @@ class CredentialCheck extends DiagnosticCheckBase implements DiagnosticCheckInte
   protected $config;
 
   /**
-   * Constructs a CloudFlareCredentialCheck object.
+   * Constructs a CredentialCheck object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.

@@ -48,13 +48,16 @@ class CloudFlareCacheTagHeaderGenerator implements EventSubscriberInterface {
     // If there are no X-Drupal-Cache-Tags headers, then there is also no work
     // to be done.
     $response = $event->getResponse();
-    if (!$response->headers->has('X-Drupal-Cache-Tags')) {
+    $cache_metadata = $response->getCacheableMetadata();
+    $cache_tags = $cache_metadata->getCacheTags();
+    $has_tags = !empty($cache_tags);
+    if (!$has_tags) {
       return;
     }
 
     $response = $event->getResponse();
 
-    $cloudflare_cachetag_header_value = static::drupalCacheTagsToCloudFlareCacheTag($response->headers->get('X-Drupal-Cache-Tags'));
+    $cloudflare_cachetag_header_value = static::drupalCacheTagsToCloudFlareCacheTag($cache_tags);
 
     // If the generated Cache-Tag header value exceeds CloudFlare's limit, hash
     // each cache tag to make the header fit, at the cost of potentially
@@ -78,7 +81,7 @@ class CloudFlareCacheTagHeaderGenerator implements EventSubscriberInterface {
    *   A CloudFlare Cache-Tag header, which has comma-separated cache tags.
    */
   protected static function drupalCacheTagsToCloudFlareCacheTag($drupal_cache_tags) {
-    return implode(',', explode(' ', $drupal_cache_tags));
+    return implode(',', $drupal_cache_tags);
   }
 
   /**

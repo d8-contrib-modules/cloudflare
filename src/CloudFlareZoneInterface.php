@@ -40,4 +40,25 @@ interface CloudFlareZoneInterface {
    */
   public function listZones();
 
+  /**
+   * Asserts that credentials are valid. Does NOT pull settings from CMI.
+   *
+   * @param string $apikey
+   *   The secret Api key used to authenticate against CloudFlare.
+   * @param string $email
+   *   Email of the account used to authenticate against CloudFlare.
+   * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $composer_dependency_check
+   *   Checks that composer dependencies are met.
+   * @param \Drupal\cloudflare\CloudFlareStateInterface $state
+   *   Tracks rate limits associated with CloudFlare Api.
+   *
+   * @throws CloudFlarePhpSdk\Exceptions\CloudFlareInvalidCredentialException
+   *   Thrown if $apikey and $email fail to authenticate against the Api.
+   * @throws CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException
+   *   Thrown if the connection to the Api times out.
+   * @throws CloudFlarePhpSdk\Exceptions\CloudFlareException
+   *   Thrown if an unknown exception occurs when connecting to the Api.
+   */
+  public static function assertValidCredentials($apikey, $email, CloudFlareComposerDependenciesCheckInterface $composer_dependency_check, CloudFlareStateInterface $state);
+
 }

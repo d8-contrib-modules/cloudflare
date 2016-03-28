@@ -7,8 +7,10 @@
 
 namespace Drupal\cloudflare\Tests;
 
+use Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock;
 use Drupal\Core\Url;
 use Drupal\simpletest\WebTestBase;
+use Drupal\cloudflare_form_tester\Mocks\ZoneMock;
 
 /**
  * Tests \Drupal\purge_ui\Form\CloudFlareAdminSettingsForm.
@@ -16,7 +18,7 @@ use Drupal\simpletest\WebTestBase;
  * @group cloudflare
  */
 class CloudFlareAdminSettingsFormTest extends WebTestBase {
-  public static $modules = ['cloudflare'];
+  public static $modules = ['cloudflare', 'cloudflare_form_tester', 'ctools'];
 
   /**
    * An admin user that has been setup for the test.
@@ -37,46 +39,73 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
    */
   public function setUp() {
     parent::setUp();
+
     $this->adminUser = $this->drupalCreateUser(['access administration pages']);
     $this->route = Url::fromRoute('cloudflare.admin_settings_form');
+    $this->drupalLogin($this->adminUser);
+    ZoneMock::mockAssertValidCredentials(TRUE);
+    ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
   }
 
   /**
-   * Tests that form has critical fields as expected.
+   * Test posting an invalid host to the form.
    */
-  public function testConfigFormDisplay() {
-    $this->drupalLogin($this->adminUser);
-    $this->drupalGet($this->route);
-    $this->assertText('This will help suppress watchdog warnings regarding requests bypassing CloudFlare', 'Helper Text');
-    $this->assertField('apikey', 'Make sure that the Api Key field is visible..');
-    $this->assertField('email', 'Make sure the edit email field is visible.');
-    $this->assertField('client_ip_restore_enabled', 'Make sure the Restore Client Ip Address checkbox is visible.');
-    $this->assertField('bypass_host', 'Make sure the bypass host field is visible.');
+  public function testValidCredentials() {
+    $edit = [
+      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
+      'email' => 'test@test.com',
+    ];
+    ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
+    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->assertUrl('/admin/config/services/cloudflare/two?js=nojs');
+    $this->drupalPostForm(NULL, [], t('Finish'));
+    $this->assertRaw('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g');
+    $this->assertRaw('test@test.com');
+    $this->assertRaw('testdomain.com');
   }
 
   /**
-   * Test if the form is at its place and has the right permissions.
+   * Test posting an invalid host to the form.
    */
-  public function testFormAccess() {
-    $this->drupalGet($this->route);
-    $this->assertResponse(403);
-    $this->drupalLogin($this->adminUser);
-    $this->drupalGet($this->route);
-    $this->assertResponse(200);
+  public function testMultiZoneSelection() {
+    ZoneMock::mockAssertValidCredentials(TRUE);
+    $edit = [
+      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
+      'email' => 'test@test.com',
+    ];
+    ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
+    ZoneMock::mockMultiZoneAccount(TRUE);
+    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->assertUrl('/admin/config/services/cloudflare/two?js=nojs');
+    $this->assertRaw('testdomain.com');
+    $this->assertRaw('testdomain2.com');
+    $this->drupalPostForm(NULL, ['zone_selection' => "123456789999"], t('Finish'));
+    $this->assertRaw('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g');
+    $this->assertRaw('testdomain2.com');
   }
+
 
   /**
    * Test posting an invalid host with https protocol to the form.
    */
   public function testInvalidBypassHostWithHttps() {
-    $this->drupalLogin($this->adminUser);
     $edit = [
-      'apikey' => 'blah',
+      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
       'email' => 'test@test.com',
       'client_ip_restore_enabled' => TRUE,
       'bypass_host' => 'https://blah.com',
     ];
-    $this->drupalPostForm($this->route, $edit, t('Save configuration'));
+    ZoneMock::mockAssertValidCredentials(TRUE);
+    $container = \Drupal::getContainer();
+    $config_factory = $container->get('config.factory');
+    $logger_channel_cloudflare = $container->get('logger.channel.cloudflare');
+    $cloudflare_state = $container->get('cloudflare.state');
+    $composer_dependencies_check = $container->get('cloudflare.composer_dependency_check');
+
+    $zone_mock = new ZoneMock($config_factory, $logger_channel_cloudflare, $cloudflare_state, $composer_dependencies_check);
+    $container->set('cloudflare.zone', $zone_mock);
+
+    $this->drupalPostForm($this->route, $edit, t('Next'));
     $this->assertText('Please enter a host without http/https');
   }
 
@@ -84,14 +113,14 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
    * Test posting an invalid host with http protocol to the form.
    */
   public function testInvalidBypassHostWithHttp() {
-    $this->drupalLogin($this->adminUser);
     $edit = [
-      'apikey' => 'blah',
+      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
       'email' => 'test@test.com',
       'client_ip_restore_enabled' => TRUE,
       'bypass_host' => 'http://blah.com',
     ];
-    $this->drupalPostForm($this->route, $edit, t('Save configuration'));
+    ZoneMock::mockAssertValidCredentials(TRUE);
+    $this->drupalPostForm($this->route, $edit, t('Next'));
     $this->assertText('Please enter a host without http/https');
   }
 
@@ -99,21 +128,14 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
    * Test posting an invalid host to the form.
    */
   public function testInvalidBypassHost() {
-    $this->drupalLogin($this->adminUser);
     $edit = [
-      'apikey' => 'blah',
+      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
       'email' => 'test@test.com',
       'client_ip_restore_enabled' => TRUE,
       'bypass_host' => 'blah!@#!@',
     ];
-    $this->drupalPostForm($this->route, $edit, t('Save configuration'));
+    $this->drupalPostForm($this->route, $edit, t('Next'));
     $this->assertText('You have entered an invalid host.');
   }
-
-  /*
-   * Tests that valid credentials are accepted.
-   *
-   * @todo need to figure out how to mock the HTTP response from CloudFlare.
-   */
 
 }

@@ -4,3 +4,6 @@ description: CloudFlare CDN integration.
 core: 8.x
 package: Web services
 configure: cloudflare.admin_settings_form
+
+dependencies:
+  - ctools

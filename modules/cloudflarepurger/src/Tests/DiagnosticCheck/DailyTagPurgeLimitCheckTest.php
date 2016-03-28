@@ -43,7 +43,7 @@ class DailyTagPurgeLimitCheckTest extends DiagnosticCheckTestBase {
     $this->drupalState->set(State::TAG_PURGE_DAILY_COUNT, $api_rate);
     $this->drupalState->set(State::TAG_PURGE_DAILY_COUNT_START, new DateTime());
 
-    $api_rate_limit_check = new DailyTagPurgeLimitCheck([], '23123', 'this is a definition', $this->cloudflareState);
+    $api_rate_limit_check = new DailyTagPurgeLimitCheck([], '23123', 'this is a definition', $this->cloudflareState, $this->composerDependencyStub);
     $actual_severity = $api_rate_limit_check->run();
     $this->assertEquals($expected_severity, $actual_severity);
   }
@@ -61,14 +61,14 @@ class DailyTagPurgeLimitCheckTest extends DiagnosticCheckTestBase {
       [NULL, DiagnosticCheckInterface::SEVERITY_OK],
       [0, DiagnosticCheckInterface::SEVERITY_OK],
       [1, DiagnosticCheckInterface::SEVERITY_OK],
-      [149, DiagnosticCheckInterface::SEVERITY_OK],
-      [150, DiagnosticCheckInterface::SEVERITY_WARNING],
-      [151, DiagnosticCheckInterface::SEVERITY_WARNING],
-      [152, DiagnosticCheckInterface::SEVERITY_WARNING],
-      [199, DiagnosticCheckInterface::SEVERITY_WARNING],
-      [200, DiagnosticCheckInterface::SEVERITY_ERROR],
-      [201, DiagnosticCheckInterface::SEVERITY_ERROR],
-      [220, DiagnosticCheckInterface::SEVERITY_ERROR],
+      [1499, DiagnosticCheckInterface::SEVERITY_OK],
+      [1500, DiagnosticCheckInterface::SEVERITY_WARNING],
+      [1501, DiagnosticCheckInterface::SEVERITY_WARNING],
+      [1502, DiagnosticCheckInterface::SEVERITY_WARNING],
+      [1999, DiagnosticCheckInterface::SEVERITY_WARNING],
+      [2000, DiagnosticCheckInterface::SEVERITY_ERROR],
+      [2001, DiagnosticCheckInterface::SEVERITY_ERROR],
+      [2002, DiagnosticCheckInterface::SEVERITY_ERROR],
     ];
   }
 

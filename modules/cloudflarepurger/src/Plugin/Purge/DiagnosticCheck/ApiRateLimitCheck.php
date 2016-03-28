@@ -10,13 +10,13 @@ namespace Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckBase;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
 use Drupal\cloudflare\CloudFlareStateInterface;
+use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use CloudFlarePhpSdk\ApiEndpoints\CloudFlareAPI;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Checks that the site is within CloudFlare's API rate limits.
  *
- * @todo We hope that one day this limit goes away.
  * CloudFlare currently has a rate limit of 1200 Api calls every 5 minutes.
  *
  * @see https://api.cloudflare.com/#requests
@@ -24,7 +24,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @PurgeDiagnosticCheck(
  *   id = "cloudflare_api_rate_limit_check",
  *   title = @Translation("CloudFlare - Api Rate limit check."),
- *   description = @Translation("Checks that the site is not violating CloudFlare's Api purge limit."),
+ *   description = @Translation("Checks that the site is not violating CloudFlare's overall Api rate limit."),
  *   dependent_queue_plugins = {},
  *   dependent_purger_plugins = {"cloudflare"}
  * )
@@ -39,7 +39,14 @@ class ApiRateLimitCheck extends DiagnosticCheckBase implements DiagnosticCheckIn
   protected $state;
 
   /**
-   * Constructs a CloudFlareApiRateLimitCheck diagnostic check object.
+   * Checks that the Composer dependencies for CloudFlare are met.
+   *
+   * @var \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface
+   */
+  protected $cloudFlareComposerDependenciesCheck;
+
+  /**
+   * Constructs a ApiRateLimitCheck diagnostic check object.
    *
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
@@ -49,10 +56,13 @@ class ApiRateLimitCheck extends DiagnosticCheckBase implements DiagnosticCheckIn
    *   The plugin implementation definition.
    * @param \Drupal\cloudflare\CloudFlareStateInterface $state
    *   Tracks rate limits associated with CloudFlare Api.
+   * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $check_interface
+   *   Checks that the composer dependencies for CloudFlare are met.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, CloudFlareStateInterface $state) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->state = $state;
+    $this->cloudFlareComposerDependenciesCheck = $check_interface;
   }
 
   /**
@@ -63,7 +73,8 @@ class ApiRateLimitCheck extends DiagnosticCheckBase implements DiagnosticCheckIn
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('cloudflare.state')
+      $container->get('cloudflare.state'),
+      $container->get('cloudflare.composer_dependency_check')
     );
   }
 
@@ -71,6 +82,11 @@ class ApiRateLimitCheck extends DiagnosticCheckBase implements DiagnosticCheckIn
    * {@inheritdoc}
    */
   public function run() {
+    if (!$this->cloudFlareComposerDependenciesCheck->check()) {
+      $this->recommendation = $this->t("Composer dependencies unmet.  Unable to assess API rate limits.");
+      return SELF::SEVERITY_ERROR;
+    }
+
     // Current number of purges today.
     $rate_count = $this->state->getApiRateCount();
     $this->value = $rate_count;

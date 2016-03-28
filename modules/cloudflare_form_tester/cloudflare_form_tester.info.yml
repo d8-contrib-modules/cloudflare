@@ -1,0 +1,9 @@
+name: CloudFlare Form Tester
+type: module
+description: Adds replacement services used for testing CloudFlare forms
+core: 8.x
+package: Web services
+
+dependencies:
+  - ctools
+  - cloudflare

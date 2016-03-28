@@ -1,0 +1,13 @@
+services:
+  cloudflare.composer_dependency_checkmock:
+    class: Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock
+    factory: Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock::create
+    arguments: ['@logger.channel.cloudflare']
+    tags:
+      - { name: cloudflare}
+  cloudflare.zonemock:
+    class: Drupal\cloudflare_form_tester\Mocks\ZoneMock
+    factory: Drupal\cloudflare_form_tester\Mocks\ZoneMock::create
+    arguments: ['@config.factory', '@logger.channel.cloudflare', '@cloudflare.state', '@cloudflare.composer_dependency_check']
+    tags:
+      - { name: cloudflare}

@@ -1,5 +1,0 @@
-cloudflare_zone_ui.admin_settings_form.admin_zone:
-  title: 'Zone Settings'
-  route_name: cloudflare_zone_ui.zone_form
-  base_route: cloudflare.admin_settings_form
-

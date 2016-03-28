@@ -16,7 +16,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Checks that the site is within CloudFlare's daily tag purge rate limit.
  *
- * CloudFlare currently has a rate limit of 200 tag purges/day.
+ * CloudFlare currently has a rate limit of 2000 tag purges/day.
+ *
+ * @todo We hope this limit is raised soon!
  *
  * @see https://support.cloudflare.com/hc/en-us/articles/206596608-How-to-Purge-Cache-Using-Cache-Tags
  *
@@ -38,6 +40,13 @@ class DailyTagPurgeLimitCheck extends DiagnosticCheckBase implements DiagnosticC
   protected $state;
 
   /**
+   * Flag for if dependencies for CloudFlare are met.
+   *
+   * @var bool
+   */
+  protected $areCloudFlareComposerDependenciesMet;
+
+  /**
    * Constructs a DailyTagPurgeLimitCheck object.
    *
    * @param array $configuration
@@ -48,10 +57,13 @@ class DailyTagPurgeLimitCheck extends DiagnosticCheckBase implements DiagnosticC
    *   The plugin implementation definition.
    * @param \Drupal\cloudflare\CloudFlareStateInterface $state
    *   Tracks rate limits associated with CloudFlare Api.
+   * @param bool $composer_dependencies_met
+   *   Checks that the composer dependencies for CloudFlare are met.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, CloudFlareStateInterface $state) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, CloudFlareStateInterface $state, $composer_dependencies_met) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->state = $state;
+    $this->areCloudFlareComposerDependenciesMet = $composer_dependencies_met;
   }
 
   /**
@@ -62,7 +74,8 @@ class DailyTagPurgeLimitCheck extends DiagnosticCheckBase implements DiagnosticC
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('cloudflare.state')
+      $container->get('cloudflare.state'),
+      $container->get('cloudflare.composer_dependency_check')->check()
     );
   }
 
@@ -70,6 +83,11 @@ class DailyTagPurgeLimitCheck extends DiagnosticCheckBase implements DiagnosticC
    * {@inheritdoc}
    */
   public function run() {
+    if (!$this->areCloudFlareComposerDependenciesMet) {
+      $this->recommendation = $this->t("Composer dependencies unmet.  Unable to assess API rate limits.");
+      return SELF::SEVERITY_ERROR;
+    }
+
     // Current number of purges today.
     $daily_count = $this->state->getTagDailyCount();
     $this->value = $daily_count;
