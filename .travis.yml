@@ -37,7 +37,7 @@ env:
     - DRUPAL_TI_ENVIRONMENT="drupal-8"
 
     # The installation profile to use:
-    #- DRUPAL_TI_INSTALL_PROFILE="testing"
+    - DRUPAL_TI_INSTALL_PROFILE="standard"
 
     # Drupal specific variables.
     - DRUPAL_TI_DB="drupal_travis_db"
