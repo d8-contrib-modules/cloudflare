@@ -65,6 +65,7 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
    * Test if the form is at its place and has the right permissions.
    */
   public function testFormAnoymousAccess() {
+    $this->drupalLogout();
     $this->drupalGet($this->route);
     $this->assertResponse(403);
   }
