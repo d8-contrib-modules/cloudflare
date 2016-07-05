@@ -22,6 +22,11 @@ cd "$DRUPAL_TI_DRUPAL_DIR/$DRUPAL_TI_MODULES_PATH"
 # Use Drush to download ctools
 drush dl ctools purge -y
 
+# Get the drush status for debugging.
+drush status
+
+drush pmi ctools purge cloudflare
+
 # Install composer dependency
 cd "$DRUPAL_TI_DRUPAL_DIR"
 composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"
