@@ -7,6 +7,7 @@
 
 namespace Drupal\cloudflarepurger\EventSubscriber;
 
+use Drupal\Core\Cache\CacheableResponseInterface;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -48,6 +49,10 @@ class CloudFlareCacheTagHeaderGenerator implements EventSubscriberInterface {
     // If there are no X-Drupal-Cache-Tags headers, then there is also no work
     // to be done.
     $response = $event->getResponse();
+    if (!$response instanceof CacheableResponseInterface) {
+      return;
+    }
+
     $cache_metadata = $response->getCacheableMetadata();
     $cache_tags = $cache_metadata->getCacheTags();
     $has_tags = !empty($cache_tags);

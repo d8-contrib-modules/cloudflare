@@ -64,9 +64,16 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
   /**
    * Test if the form is at its place and has the right permissions.
    */
-  public function testFormAccess() {
+  public function testInvalidFormAccess() {
+    $this->rebuildContainer();
+    \Drupal::service('router.builder')->rebuild();
     $this->drupalGet($this->route);
     $this->assertResponse(403);
+  }
+  /**
+   * Test if the form is at its place and has the right permissions.
+   */
+  public function testFormAccess() {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet($this->route);
     $this->assertResponse(200);
