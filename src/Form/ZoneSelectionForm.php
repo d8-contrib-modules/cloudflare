@@ -15,6 +15,8 @@ use Drupal\cloudflare\CloudFlareZoneInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 
 /**
  * Class ZoneSelectionForm.
@@ -125,6 +127,23 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
     ];
 
     if (!$this->hasMultipleZones && $this->hasValidCredentials) {
+
+      // It is possible to authenticate with the API without having configured a
+      // domain in the CloudFlare console. This prevents a fatal error where
+      // zones[0]->getZoneId() is called on a NULL reference.
+      if (empty($this->zones)) {
+        $add_site_link = Link::fromTextAndUrl(
+          $this->t('add a site'),
+          Url::fromUri('https://www.cloudflare.com/a/setup')
+        );
+        $section['zone_selection_fieldset']['zone_selection'] = [
+          '#markup' => $this->t('<p>Your CloudFlare account does not have any zones configured. Verify your API details or !add_site_link via the console.', [
+            '!add_site_link' => $add_site_link->toString(),
+          ]),
+        ];
+        return $section;
+      }
+
       $zone_id = $this->zones[0]->getZoneId();
       $this->config->set('zone_id', $zone_id)->save();
       $section['zone_selection_fieldset']['zone_selection'] = [
