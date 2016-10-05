@@ -137,7 +137,7 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
           Url::fromUri('https://www.cloudflare.com/a/setup')
         );
         $section['zone_selection_fieldset']['zone_selection'] = [
-          '#markup' => $this->t('<p>Your CloudFlare account does not have any zones configured. Verify your API details or !add_site_link via the console.', [
+          '#markup' => $this->t('<p>Your CloudFlare account does not have any zones configured. Verify your API details or !add_site_link via the console.</p>', [
             '!add_site_link' => $add_site_link->toString(),
           ]),
         ];
