@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\Tests\CloudFlareAdminSettingsInvalidFormTest.
- */
-
 namespace Drupal\cloudflare\Tests;
 
 use Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock;

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\cloudflare\EventSubscriber\ClientIpRestore.
- */
-
 namespace Drupal\cloudflare\EventSubscriber;
 
 use Drupal\Core\Url;

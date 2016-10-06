@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\cloudflare\Form\ZoneSelectionForm.
- */
-
 namespace Drupal\cloudflare\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;

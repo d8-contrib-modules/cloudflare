@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of \Drupal\cloudflare\Tests\CloudFlareAdminSettingsFormTest.
- */
-
 namespace Drupal\cloudflare\Tests;
 
 use Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock;

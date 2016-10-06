@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of Drupal\cloudflare\Tests.
- */
-
 namespace Drupal\cloudflare\Tests;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
