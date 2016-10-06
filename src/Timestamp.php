@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Definition of \Drupal\cloudflare\Timestamp.
- */
 
 namespace Drupal\cloudflare;
 

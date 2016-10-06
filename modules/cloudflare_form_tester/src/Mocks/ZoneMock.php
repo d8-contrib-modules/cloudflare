@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare_form_tester\ZoneMock.
- */
-
 namespace Drupal\cloudflare_form_tester\Mocks;
 use CloudFlarePhpSdk\Exceptions\CloudFlareInvalidCredentialException;
 use Drupal\Core\StringTranslation\StringTranslationTrait;

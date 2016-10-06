@@ -1,8 +1,5 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflarepurger\DiagnosticCheckBase.
- *
+/*
  * @todo Relocate this to the tests directory.  Currently core's run tests
  * auto-detects this as a class with tests to run.  Moving the file outside
  * of tests was the only workaround.

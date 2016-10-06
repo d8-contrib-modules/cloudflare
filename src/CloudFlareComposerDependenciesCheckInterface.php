@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface.
- */
-
 namespace Drupal\cloudflare;
 
 /**

@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflare\CloudFlareStateInterface.
- */
 
 namespace Drupal\cloudflare;
 

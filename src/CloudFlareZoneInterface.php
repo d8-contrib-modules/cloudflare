@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflare\CloudflareZoneInterface.
- */
 
 namespace Drupal\cloudflare;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;

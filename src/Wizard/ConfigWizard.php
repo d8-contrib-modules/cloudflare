@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\Wizard\ConfigWizard.
- */
-
 namespace Drupal\cloudflare\Wizard;
 use Drupal\ctools\Wizard\FormWizardBase;
 

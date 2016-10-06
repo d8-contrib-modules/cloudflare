@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\State.
- */
-
 namespace Drupal\cloudflare;
 
 use Drupal\Core\State\StateInterface;

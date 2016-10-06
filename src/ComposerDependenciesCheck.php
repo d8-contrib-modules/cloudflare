@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\ComposerDependenciesCheck.
- */
-
 namespace Drupal\cloudflare;
 
 use Psr\Log\LoggerInterface;

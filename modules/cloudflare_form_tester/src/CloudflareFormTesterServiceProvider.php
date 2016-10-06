@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflare_form_tester\CloudflareFormTesterServiceProvider.
- */
 
 namespace Drupal\cloudflare_form_tester;
 

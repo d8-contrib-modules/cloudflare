@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\ComposerDependenciesCheck.
- */
-
 namespace Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck;
 
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckBase;

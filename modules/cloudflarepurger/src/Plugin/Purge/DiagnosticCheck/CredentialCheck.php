@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\purge\Plugin\PurgeDiagnosticCheck\CredentialCheck.
- */
-
 namespace Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck;
 
 use Drupal\Core\Config\ConfigFactoryInterface;

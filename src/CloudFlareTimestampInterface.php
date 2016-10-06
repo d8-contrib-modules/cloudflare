@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflare\CloudFlareTimestampInterface.
- */
 
 namespace Drupal\cloudflare;
 
