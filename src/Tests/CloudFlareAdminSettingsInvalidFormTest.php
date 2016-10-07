@@ -42,7 +42,6 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
     ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
   }
 
-
   /**
    * Tests that form has critical fields as expected.
    */

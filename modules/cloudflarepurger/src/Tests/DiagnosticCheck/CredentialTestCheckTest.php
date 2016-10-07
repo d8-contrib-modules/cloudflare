@@ -1,19 +1,18 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflarepurger\Tests\DiagnosticCheck\CredentialTestCheck.
- */
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
+
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
 use Drupal\cloudflarepurger\DiagnosticCheckTestBase;
 use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\CredentialCheck;
+
 /**
  * Tests that purge_requirements() passes on our diagnostic checks.
  *
  * @group cloudflare
  */
 class CredentialTestCheckTest extends DiagnosticCheckTestBase {
+
   /**
    * Tests that CredentialTestCheck Responds as expected with test purge rates.
    *

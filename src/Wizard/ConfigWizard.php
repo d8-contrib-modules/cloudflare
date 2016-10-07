@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\cloudflare\Wizard;
+
 use Drupal\ctools\Wizard\FormWizardBase;
 
 /**
@@ -11,6 +12,7 @@ use Drupal\ctools\Wizard\FormWizardBase;
  * supports this workflow.
  */
 class ConfigWizard extends FormWizardBase {
+
   /**
    * {@inheritdoc}
    */

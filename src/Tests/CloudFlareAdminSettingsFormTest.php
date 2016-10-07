@@ -79,7 +79,6 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
     $this->assertRaw('testdomain2.com');
   }
 
-
   /**
    * Test posting an invalid host with https protocol to the form.
    */

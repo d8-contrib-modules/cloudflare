@@ -100,7 +100,6 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
     return 'cloudflare_zone_selection';
   }
 
-
   /**
    * {@inheritdoc}
    */

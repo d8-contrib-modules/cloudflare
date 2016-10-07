@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\cloudflarepurger\Plugin\Purge\Purger;
+
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\cloudflare\CloudFlareStateInterface;

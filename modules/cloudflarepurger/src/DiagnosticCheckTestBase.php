@@ -1,15 +1,20 @@
 <?php
+
+namespace Drupal\cloudflarepurger;
+
+use Drupal\Tests\UnitTestCase;
+use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
+use Drupal\Core\State\State as CoreState;
+use Drupal\cloudflare\State as CloudFlareState;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
+
 /*
  * @todo Relocate this to the tests directory.  Currently core's run tests
  * auto-detects this as a class with tests to run.  Moving the file outside
  * of tests was the only workaround.
  */
 
-namespace Drupal\cloudflarepurger;
-use Drupal\Tests\UnitTestCase;
-use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
-use Drupal\cloudflare\State;
-use Drupal\Core\DependencyInjection\ContainerBuilder;
+
 /**
  * Tests that purge_requirements() passes on our diagnostic checks.
  *
@@ -57,11 +62,11 @@ abstract class DiagnosticCheckTestBase extends UnitTestCase {
    */
   public function setUp() {
     parent::setUp();
-    $this->drupalState = new \Drupal\Core\State\State(new KeyValueMemoryFactory());
+    $this->drupalState = new CoreState(new KeyValueMemoryFactory());
     $this->timestampStub = $this->getMockBuilder('Drupal\cloudflare\Timestamp')
       ->disableOriginalConstructor()
       ->getMock();
-    $this->cloudflareState = new State($this->drupalState, $this->timestampStub);
+    $this->cloudflareState = new CloudFlareState($this->drupalState, $this->timestampStub);
 
     $this->container = new ContainerBuilder();
     $this->container->set('string_translation', $this->getStringTranslationStub());

@@ -43,7 +43,6 @@ class ComposerDependenciesCheck implements CloudFlareComposerDependenciesCheckIn
     $this->logger = $logger;
   }
 
-
   /**
    * {@inheritdoc}
    */

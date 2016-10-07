@@ -18,7 +18,6 @@ use CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareInvalidCredentialException;
 use \InvalidArgumentException;
 
-
 /**
  * Class SettingsForm.
  *
@@ -174,7 +173,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
     // 1: parent::buildForm creates the submit button
     // 2: we want to disable the submit button since dependencies unmet.
     if (!$this->cloudFlareComposerDependenciesMet) {
-      drupal_set_message($this->t(CloudFlareComposerDependenciesCheckInterface::ERROR_MESSAGE), 'error');
+      drupal_set_message((CloudFlareComposerDependenciesCheckInterface::ERROR_MESSAGE), 'error');
 
       $form['api_credentials_fieldset']['apikey']['#disabled'] = TRUE;
       $form['api_credentials_fieldset']['email']['#disabled'] = TRUE;
@@ -234,7 +233,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
 
     if ($this->hasZoneId) {
       $zone_id = $this->config->get('zone_id');
-      $description = 'To change the current zone click the "Next" button below.';
+      $description = $this->t('To change the current zone click the "Next" button below.');
       foreach ($this->zones as $zone) {
         if ($zone->getZoneId() == $zone_id) {
           $zone_text = $zone->getName();
@@ -244,13 +243,13 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
 
     else {
       $zone_text = "No Zone Selected";
-      $description = 'No zone has been selected.  Enter valid Api credentials then click next.';
+      $description = $this->t('No zone has been selected.  Enter valid Api credentials then click next.');
     }
 
     $section['zone_selection_fieldset']['zone'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Current Zone'),
-      '#description' => $this->t($description),
+      '#description' => $description,
       '#default_value' => $zone_text,
       '#disabled' => TRUE,
     ];
@@ -310,8 +309,8 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
       $this->zoneApi->assertValidCredentials($apikey, $email, $this->cloudFlareComposerDependenciesCheck, $this->state);
     }
     catch (CloudFlareTimeoutException $e) {
-      $message = 'Unable to connect to CloudFlare in order to validate credentials.  Connection timed out.  Please try again later.';
-      $form_state->setErrorByName('apikey', $this->t($message));
+      $message = $this->t('Unable to connect to CloudFlare in order to validate credentials.  Connection timed out.  Please try again later.');
+      $form_state->setErrorByName('apikey', $message);
       $this->logger->error($message);
       return;
     }
@@ -320,7 +319,7 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
       return;
     }
     catch (CloudFlareException $e) {
-      $form_state->setErrorByName('apikey', $this->t('An unknown error has occurred when attempting to connect to CloudFlare\'s API' . $e->getMessage()));
+      $form_state->setErrorByName('apikey', $this->t("An unknown error has occurred when attempting to connect to CloudFlare's API") . $e->getMessage());
       return;
     }
 

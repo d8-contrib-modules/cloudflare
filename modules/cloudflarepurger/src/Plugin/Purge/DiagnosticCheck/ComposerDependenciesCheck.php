@@ -62,7 +62,7 @@ class ComposerDependenciesCheck extends DiagnosticCheckBase implements Diagnosti
    */
   public function run() {
     if (!$this->areCloudFlareComposerDependenciesMet) {
-      $this->recommendation = $this->t(CloudFlareComposerDependenciesCheckInterface::ERROR_MESSAGE);
+      $this->recommendation = CloudFlareComposerDependenciesCheckInterface::ERROR_MESSAGE;
       return SELF::SEVERITY_ERROR;
     }
 

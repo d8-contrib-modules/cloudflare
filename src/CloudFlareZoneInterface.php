@@ -1,6 +1,7 @@
 <?php
 
 namespace Drupal\cloudflare;
+
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
 
 /**

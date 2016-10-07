@@ -1,10 +1,7 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflarepurger\Tests\DiagnosticCheck\DailyTagPurgeLimitCheckTest.
- */
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
+
 use \DateTime;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
@@ -18,6 +15,7 @@ use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\DailyTagPurgeLimitCheck
  * @group cloudflare
  */
 class DailyTagPurgeLimitCheckTest extends DiagnosticCheckTestBase {
+
   /**
    * {@inheritdoc}
    */
