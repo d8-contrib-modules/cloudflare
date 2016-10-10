@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflare\CloudFlareStateInterface.
- */
 
 namespace Drupal\cloudflare;
 
@@ -10,6 +6,7 @@ namespace Drupal\cloudflare;
  * Tracks rate limits associated with CloudFlare Api.
  */
 interface CloudFlareStateInterface {
+
   /**
    * Get the count of purges done in the past 5 minutes.
    *

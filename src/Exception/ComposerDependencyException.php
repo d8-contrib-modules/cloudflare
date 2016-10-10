@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\Exception\ComposerDependencyException.
- */
-
 namespace Drupal\cloudflare\Exception;
 
 /**

@@ -1,10 +1,7 @@
 <?php
-/**
- * @file
- * Contains \Drupal\cloudflarepurger\Tests\DiagnosticCheck\CredentialTestCheck.
- */
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
+
 use \DateTime;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
 use Drupal\cloudflare\State;
@@ -19,6 +16,7 @@ use Drupal\cloudflarepurger\DiagnosticCheckTestBase;
  * @covers \Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\ApiRateLimitCheck
  */
 class ApiRateLimitCheckTest extends DiagnosticCheckTestBase {
+
   /**
    * Tests that ApiRateLimitCheck Responds as expected with test purge rates.
    *

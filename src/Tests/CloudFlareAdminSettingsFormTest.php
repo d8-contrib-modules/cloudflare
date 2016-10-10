@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Definition of \Drupal\cloudflare\Tests\CloudFlareAdminSettingsFormTest.
- */
-
 namespace Drupal\cloudflare\Tests;
 
 use Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock;
@@ -83,7 +78,6 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
     $this->assertRaw('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g');
     $this->assertRaw('testdomain2.com');
   }
-
 
   /**
    * Test posting an invalid host with https protocol to the form.

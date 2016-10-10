@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\Plugin\DailyTagPurgeLimitCheck.
- */
-
 namespace Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck;
 
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckBase;

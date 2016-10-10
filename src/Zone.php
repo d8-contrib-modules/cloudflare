@@ -1,11 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\Zone.
- */
-
 namespace Drupal\cloudflare;
+
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\cloudflare\Exception\ComposerDependencyException;
@@ -106,7 +102,7 @@ class Zone implements CloudFlareZoneInterface {
    *   A logger instance.
    * @param \Drupal\cloudflare\CloudFlareStateInterface $state
    *   Tracks rate limits associated with CloudFlare Api.
-   * @param \CloudFlarePhpSdk\ApiEndpoints\ZoneApi | NULL $zone_api
+   * @param \CloudFlarePhpSdk\ApiEndpoints\ZoneApi|null $zone_api
    *   ZoneApi instance for accessing api.
    * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $check_interface
    *   Checks that composer dependencies are met.

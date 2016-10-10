@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\Mocks\ComposerDependenciesCheckMock.
- */
-
 namespace Drupal\cloudflare_form_tester\Mocks;
 
 use Psr\Log\LoggerInterface;

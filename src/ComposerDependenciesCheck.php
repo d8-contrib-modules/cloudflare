@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\ComposerDependenciesCheck.
- */
-
 namespace Drupal\cloudflare;
 
 use Psr\Log\LoggerInterface;
@@ -47,7 +42,6 @@ class ComposerDependenciesCheck implements CloudFlareComposerDependenciesCheckIn
   public function __construct(LoggerInterface $logger) {
     $this->logger = $logger;
   }
-
 
   /**
    * {@inheritdoc}

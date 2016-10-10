@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\cloudflare\Form\ZoneSelectionForm.
- */
-
 namespace Drupal\cloudflare\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -104,7 +99,6 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
   public function getFormId() {
     return 'cloudflare_zone_selection';
   }
-
 
   /**
    * {@inheritdoc}

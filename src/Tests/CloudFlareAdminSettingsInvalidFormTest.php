@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\Tests\CloudFlareAdminSettingsInvalidFormTest.
- */
-
 namespace Drupal\cloudflare\Tests;
 
 use Drupal\cloudflare_form_tester\Mocks\ComposerDependenciesCheckMock;
@@ -46,7 +41,6 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
     $this->route = Url::fromRoute('cloudflare.admin_settings_form');
     ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
   }
-
 
   /**
    * Tests that form has critical fields as expected.

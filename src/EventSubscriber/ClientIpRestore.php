@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\cloudflare\EventSubscriber\ClientIpRestore.
- */
-
 namespace Drupal\cloudflare\EventSubscriber;
 
 use Drupal\Core\Url;
@@ -37,7 +32,7 @@ class ClientIpRestore implements EventSubscriberInterface {
   /**
    * Cache backend service.
    *
-   * @var \Drupal\Core\Cache\CacheBackendInterface;
+   * @var \Drupal\Core\Cache\CacheBackendInterface
    */
   protected $cache;
 
@@ -139,7 +134,7 @@ class ClientIpRestore implements EventSubscriberInterface {
     $request_originating_from_cloudflare = IpUtils::checkIp($client_ip, $cloudflare_ipranges);
 
     if ($has_http_cf_connecting_ip && !$request_originating_from_cloudflare) {
-      $message = $this->t("Client IP of $client_ip does not match a known CloudFlare IP but there is HTTP_CF_CONNECTING_IP of $cf_connecting_ip.");
+      $message = $this->t("Client IP of @client_ip does not match a known CloudFlare IP but there is HTTP_CF_CONNECTING_IP of @cf_connecting_ip.", ['@cf_connecting_ip' => $cf_connecting_ip, '@client_ip' => $client_ip]);
       $this->logger->warning($message);
       return;
     }

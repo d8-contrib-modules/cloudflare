@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\cloudflare\EventSubscriber\CloudFlareCacheTagHeaderGenerator.
- */
-
 namespace Drupal\cloudflarepurger\EventSubscriber;
 
 use Drupal\Core\Cache\CacheableResponseInterface;
