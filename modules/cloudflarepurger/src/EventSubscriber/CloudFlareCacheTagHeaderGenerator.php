@@ -59,14 +59,11 @@ class CloudFlareCacheTagHeaderGenerator implements EventSubscriberInterface {
 
     $cloudflare_cachetag_header_value = static::drupalCacheTagsToCloudFlareCacheTag($cache_tags);
 
-    // If the generated Cache-Tag header value exceeds CloudFlare's limit, hash
-    // each cache tag to make the header fit, at the cost of potentially
+    // Hash each cache tag to make the header fit, at the cost of potentially
     // invalidating too much (cfr. hash collisions).
-    if (strlen($cloudflare_cachetag_header_value) > $this->limit) {
-      $cache_tags = explode(',', $cloudflare_cachetag_header_value);
-      $hashes = static::cacheTagsToHashes($cache_tags);
-      $cloudflare_cachetag_header_value = implode(',', $hashes);
-    }
+    $cache_tags = explode(',', $cloudflare_cachetag_header_value);
+    $hashes = static::cacheTagsToHashes($cache_tags);
+    $cloudflare_cachetag_header_value = implode(',', $hashes);
 
     $response->headers->set('Cache-Tag', $cloudflare_cachetag_header_value);
   }
