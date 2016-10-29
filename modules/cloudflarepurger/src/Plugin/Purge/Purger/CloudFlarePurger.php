@@ -195,9 +195,7 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
         // Also invalidate the cache tags as hashes, to automatically also work
         // for responses that exceed CloudFlare's Cache-Tag header limit.
         $hashes = CloudFlareCacheTagHeaderGenerator::cacheTagsToHashes($api_targets_to_purge);
-        $tags = Cache::mergeTags($api_targets_to_purge, $hashes);
-
-        $this->zoneApi->purgeTags($this->zone, $tags);
+        $this->zoneApi->purgeTags($this->zone, $hashes);
         $this->state->incrementTagPurgeDailyCount();
 
       }
