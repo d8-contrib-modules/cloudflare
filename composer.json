@@ -23,7 +23,7 @@
     }
   },
   "require": {
-    "d8-contrib-modules/cloudflarephpsdk": "^1.0.0",
+    "d8-contrib-modules/cloudflarephpsdk": "^1",
     "drupal/ctools":                       "8.*"
   },
   "require-dev": {
