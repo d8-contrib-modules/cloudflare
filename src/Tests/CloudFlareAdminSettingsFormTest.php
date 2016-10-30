@@ -72,8 +72,6 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
     ZoneMock::mockMultiZoneAccount(TRUE);
     $this->drupalPostForm($this->route, $edit, t('Next'));
     $this->assertUrl('/admin/config/services/cloudflare/two?js=nojs');
-    $this->assertRaw('testdomain.com');
-    $this->assertRaw('testdomain2.com');
     $this->drupalPostForm(NULL, ['zone_selection' => "123456789999"], t('Finish'));
     $this->assertRaw('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g');
     $this->assertRaw('testdomain2.com');
