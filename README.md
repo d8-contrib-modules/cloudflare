@@ -7,7 +7,7 @@ Special thanks to Wim Leers and Niels Van Mourik for their collaboration and sup
 
 ## Note to those updating from earlier version
 You will need to update your composer dependencies:
--   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"`
+-   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha4"`
 - You will also need to update to the most recent version of the Purge module.
 
 ## Note to those on CloudFlare Free Tier
@@ -30,9 +30,9 @@ CloudFlare has limited support for tag clearing to their enterprise tier. To swi
 
 ## Dependencies
 - [CTools D8 Module](https://www.drupal.org/project/ctools)
-- [Purge D8 Module](https://www.drupal.org/project/purge)
-- [URLs Queuer Module](https://www.drupal.org/project/purge_queuer_url)
-- [CloudFlarePhpSdk ](https://github.com/d8-contrib-modules/cloudflarephpsdk) - The module relies on the CloudFlarePhpSdk for all interactions with the
+- [Purge D8 Module](https://www.drupal.org/project/purge) (for purging)
+- [URLs Queuer Module](https://www.drupal.org/project/purge_queuer_url) (for free tier or purging by URL only)
+- [CloudFlarePhpSdk](https://github.com/d8-contrib-modules/cloudflarephpsdk) - The module relies on the CloudFlarePhpSdk for all interactions with the
 CloudFlare API.  You can check it out [here](https://github.com/d8-contrib-modules/cloudflarephpsdk).
 
 ## CloudFlare Free Tier vs Enterprise
@@ -47,10 +47,10 @@ CloudFlare API.  You can check it out [here](https://github.com/d8-contrib-modul
   domain via .htaccess rules.
 - By default CloudFlare will cache static resources but not HTML. You need to add a page rule to cache all the things.
 
-## Getting Started
+## Getting Started (Free Tier)
 - `drush dl cloudflare purge ctools purge_queuer_url --yes`
 -  From the root of your site run install composer dependencies:
-   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"`
+   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha4"`
 - To install: `drush en cloudflare cloudflarepurger purge purge_ui purge_drush purge_queuer_coretags purge_processor_cron --yes`
 - *Note*: If you try to install purge, cloudflare and cloudflare_purger all at once via the UI you will get a one time error on install.  This is known issue that is impacting other D8 modules. See
  [here](https://www.drupal.org/node/1387438)
@@ -76,7 +76,7 @@ CloudFlare API.  You can check it out [here](https://github.com/d8-contrib-modul
 ## Getting Started (Experimental Cache Tag Support: Enterprise Tier ONLY)
 - `drush dl cloudflare purge ctools --yes`
 -  From the root of your site run install composer dependencies:
-   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha3"`
+   `composer require d8-contrib-modules/cloudflarephpsdk "1.0.0-alpha4"`
 - To install: `drush en cloudflare cloudflarepurger purge purge_ui purge_drush purge_queuer_coretags purge_processor_cron --yes`
 - *Note*: If you try to install purge, cloudflare and cloudflare_purger all at once via the UI you will get a one time error on install.  This is known issue that is impacting other D8 modules. See
  [here](https://www.drupal.org/node/1387438)
