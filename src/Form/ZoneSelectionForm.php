@@ -9,6 +9,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\cloudflare\CloudFlareZoneInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
@@ -167,14 +169,15 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
     }
 
     $form_select_field = [
-      '#type' => 'select',
+      '#type' => 'textfield',
       '#title' => $this->t('Zone'),
       '#disabled' => FALSE,
       '#options' => $zone_select,
-      '#description' => $this->t('Select the top level domain/zone for the current site.'),
+      '#description' => $this->t('Use the autocomplete to select your zone (top level domain for the site). The zone ID corresponding to the domain will then be saved in the field.'),
       '#default_value' => $this->config->get('zone_id'),
       '#empty_option' => '- None -',
       '#empty_value' => '0',
+      '#autocomplete_route_name' => 'cloudflare.zone_autocomplete',
     ];
 
     return $form_select_field;
@@ -190,6 +193,32 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
     }
 
     $form_state->setRedirect('cloudflare.admin_settings_form');
+  }
+
+  /**
+   * Retrieves suggestions for zone autocompletion.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The current request.
+   *
+   * @return \Symfony\Component\HttpFoundation\JsonResponse
+   *   A JSON response containing autocomplete suggestions.
+   */
+  public function autocompleteZone(Request $request) {
+    $zone_autocomplete_text = $request->query->get('q');
+    $matches = array();
+
+    /**
+     * Tracks if the current CloudFlare account has multiple zones.
+     *
+     * @var $zone \CloudFlarePhpSdk\ApiTypes\Zone\Zone;
+     */
+    foreach ($this->zoneApi->listZones() as $zone) {
+      if (stripos($zone->getName(),$zone_autocomplete_text) === 0) {
+        $matches[] = array('value' => $zone->getZoneId(), 'label' => $zone->getName());
+      }
+    }
+    return new JsonResponse($matches);
   }
 
 }
