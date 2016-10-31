@@ -4,6 +4,7 @@ namespace Drupal\cloudflare;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\cloudflare\Exception\ComposerDependencyException;
 use CloudFlarePhpSdk\ApiEndpoints\ZoneApi;
 use CloudFlarePhpSdk\ApiTypes\Zone\ZoneSettings;
@@ -67,9 +68,16 @@ class Zone implements CloudFlareZoneInterface {
   protected $cloudFlareComposerDependenciesCheck;
 
   /**
+   * The cache backend.
+   *
+   * @var \Drupal\Core\Cache\CacheBackendInterface
+   */
+  protected $cache;
+
+  /**
    * {@inheritdoc}
    */
-  public static function create(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
+  public static function create(ConfigFactoryInterface $config, LoggerInterface $logger, CacheBackendInterface $cache, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
     $cf_config = $config->get('cloudflare.settings');
     $api_key = $cf_config->get('apikey');
     $email = $cf_config->get('email');
@@ -87,6 +95,7 @@ class Zone implements CloudFlareZoneInterface {
     return new static(
       $config,
       $logger,
+      $cache,
       $state,
       $zoneapi,
       $check_interface
@@ -104,12 +113,15 @@ class Zone implements CloudFlareZoneInterface {
    *   Tracks rate limits associated with CloudFlare Api.
    * @param \CloudFlarePhpSdk\ApiEndpoints\ZoneApi|null $zone_api
    *   ZoneApi instance for accessing api.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The cache backend.
    * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $check_interface
    *   Checks that composer dependencies are met.
    */
-  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state, $zone_api, CloudFlareComposerDependenciesCheckInterface $check_interface) {
+  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CacheBackendInterface $cache, CloudFlareStateInterface $state, $zone_api, CloudFlareComposerDependenciesCheckInterface $check_interface) {
     $this->config = $config->get('cloudflare.settings');
     $this->logger = $logger;
+    $this->cache = $cache;
     $this->state = $state;
     $this->zoneApi = $zone_api;
     $this->zone = $this->config->get('zone');
@@ -164,10 +176,25 @@ class Zone implements CloudFlareZoneInterface {
   public function listZones() {
     $this->cloudFlareComposerDependenciesCheck->assert();
     $zones = [];
-
+    $cid = 'cloudflare_zone_listing';
     try {
-      $zones = $this->zoneApi->listZones();
-      $this->state->incrementApiRateCount();
+
+      if ($cached = $this->cache->get($cid)) {
+       return $cached->data;
+      }
+      
+      else {
+        $zones = $this->zoneApi->listZones();
+
+        //@todo come up with a better approach.
+        $num_pages = ceil(count($zones) / ZoneApi::MAX_ITEMS_PER_PAGE);
+        for ($i=0; $i < $num_pages; $i++) {
+          $this->state->incrementApiRateCount();
+        }
+
+        $this->cache->set($cid, $zones, time() + 60 * 5, ['cloudflare_zone']);
+      }
+
     }
     catch (CloudFlareException $e) {
       $this->logger->error($e->getMessage());

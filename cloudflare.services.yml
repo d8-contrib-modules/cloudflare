@@ -15,7 +15,7 @@ services:
   cloudflare.zone:
     class: Drupal\cloudflare\Zone
     factory: Drupal\cloudflare\Zone::create
-    arguments: ['@config.factory', '@logger.channel.cloudflare', '@cloudflare.state', '@cloudflare.composer_dependency_check']
+    arguments: ['@config.factory', '@logger.channel.cloudflare', '@cache.data', '@cloudflare.state', '@cloudflare.composer_dependency_check']
     tags:
       - { name: cloudflare}
   logger.channel.cloudflare:
