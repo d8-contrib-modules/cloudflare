@@ -16,4 +16,4 @@ This project is built using TravisCI because:
 - D.O's testbot does not support Drupal Code Sniffer.
 
 This project's active development occurs on GitHub:
-- Developers are more comfortable with pull-request based contribution that D.O's patch based workflow.
+- Developers are more comfortable with pull-request based contribution than D.O's patch based workflow.
