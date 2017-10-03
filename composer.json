@@ -10,7 +10,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url":  "https://packagist.drupal-composer.org"
+      "url":  "https://packages.drupal.org/8"
     }
   ],
   "extra": {
@@ -24,7 +24,7 @@
   },
   "require": {
     "d8-contrib-modules/cloudflarephpsdk": "^1",
-    "drupal/ctools":                       "8.*"
+    "drupal/ctools": "^3.0"
   },
   "require-dev": {
     "drupal-composer/drupal-scaffold":    "^2.0.0",
@@ -55,6 +55,3 @@
     }
   }
 }
-
-
-
