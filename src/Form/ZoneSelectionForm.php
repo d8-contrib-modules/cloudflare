@@ -206,7 +206,7 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
    */
   public function autocompleteZone(Request $request) {
     $zone_autocomplete_text = $request->query->get('q');
-    $matches = array();
+    $matches = [];
 
     /**
      * Tracks if the current CloudFlare account has multiple zones.
@@ -214,8 +214,8 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
      * @var $zone \CloudFlarePhpSdk\ApiTypes\Zone\Zone;
      */
     foreach ($this->zoneApi->listZones() as $zone) {
-      if (stripos($zone->getName(),$zone_autocomplete_text) === 0) {
-        $matches[] = array('value' => $zone->getZoneId(), 'label' => $zone->getName());
+      if (stripos($zone->getName(), $zone_autocomplete_text) === 0) {
+        $matches[] = ['value' => $zone->getZoneId(), 'label' => $zone->getName()];
       }
     }
     return new JsonResponse($matches);

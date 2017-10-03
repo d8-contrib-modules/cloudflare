@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Install, update, and uninstall functions for the CloudFlare module.
@@ -27,11 +28,11 @@ function cloudflare_requirements($phase) {
       $link_to_settings = Url::fromRoute('cloudflare.admin_settings_form')->toString();
       $message = t('Missing valid credentials for CloudFlare. Please go <a href="@link_to_settings">here</a> to set.', ['@link_to_settings' => $link_to_settings]);
 
-      $requirements['cloudflare'] = array(
+      $requirements['cloudflare'] = [
         'title' => t('CloudFlare - Credentials'),
         'severity' => REQUIREMENT_ERROR,
         'description' => $message,
-      );
+      ];
     }
     if (\Drupal::moduleHandler()->moduleExists('cloudflare_zone_ui')) {
       \Drupal::service('module_installer')->uninstall([('cloudflare_zone_ui')]);

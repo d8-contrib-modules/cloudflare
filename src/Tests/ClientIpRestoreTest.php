@@ -81,10 +81,10 @@ class ClientIpRestoreTest extends UnitTestCase {
       ->getMock();
 
     // Create a map of arguments to return values.
-    $map = array(
-      array(ClientIpRestore::CLOUDFLARE_BYPASS_HOST, $bypass_host),
-      array(ClientIpRestore::CLOUDFLARE_CLIENT_IP_RESTORE_ENABLED, $client_ip_restore_enabled),
-    );
+    $map = [
+      [ClientIpRestore::CLOUDFLARE_BYPASS_HOST, $bypass_host],
+      [ClientIpRestore::CLOUDFLARE_CLIENT_IP_RESTORE_ENABLED, $client_ip_restore_enabled],
+    ];
     $config->expects($this->atLeastOnce())
       ->method('get')
       ->will($this->returnValueMap($map));
