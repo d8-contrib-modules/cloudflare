@@ -37,17 +37,15 @@
     "drupal/coder":                       "^8.2",
     "lakion/mink-debug-extension":        "^1.0.3",
     "phpunit/phpunit":                    "~4.8",
-    "squizlabs/php_codesniffer":          "~2"
+    "squizlabs/php_codesniffer":          "~2",
+    "drupal/purge": "^3.0@beta"
   },
   "scripts": {
     "post-install-cmd": [
-      "PhantomInstaller\\Installer::installPhantomJS",
-      "mkdir -p docroot/modules/program && rsync -a . docroot/modules/program  --exclude \".idea\" --exclude bin --exclude \".git\" --exclude \".gitignore\" --exclude docroot --exclude \"*.make\" --exclude \".travis.yml\" --exclude vendor && rm -fr modules/contrib themes/contrib"
+      "PhantomInstaller\\Installer::installPhantomJS"
     ],
-    "post-update-cmd": [
-      "mkdir -p docroot/modules/program && rsync -a . docroot/modules/program  --exclude \".idea\" --exclude bin --exclude \".git\" --exclude \".gitignore\" --exclude docroot --exclude \"*.make\" --exclude \".travis.yml\" --exclude vendor && rm -fr modules/contrib themes/contrib"
-    ],
-    "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold"
+    "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
+    "test": "./run-tests.sh"
   },
   "autoload-dev": {
     "psr-4": {

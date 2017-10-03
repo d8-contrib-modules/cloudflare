@@ -4,6 +4,8 @@ namespace Drupal\cloudflarepurger;
 
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
+use Drupal\Core\Cache\MemoryBackend;
+use Drupal\Core\Lock\NullLockBackend;
 use Drupal\Core\State\State as CoreState;
 use Drupal\cloudflare\State as CloudFlareState;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -62,7 +64,7 @@ abstract class DiagnosticCheckTestBase extends UnitTestCase {
    */
   public function setUp() {
     parent::setUp();
-    $this->drupalState = new CoreState(new KeyValueMemoryFactory());
+    $this->drupalState = new CoreState(new KeyValueMemoryFactory(), new MemoryBackend('test'), new NullLockBackend());
     $this->timestampStub = $this->getMockBuilder('Drupal\cloudflare\Timestamp')
       ->disableOriginalConstructor()
       ->getMock();
