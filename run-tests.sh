@@ -7,5 +7,41 @@ mkdir -p docroot/modules/program && rsync -a . docroot/modules/program  --exclud
 mkdir -p docroot/profiles
 mkdir -p docroot/themes
 
-# Run the tests
-cd docroot/core && ../../vendor/bin/phpunit --group=cloudflare ../modules/program
+# move into docroot
+cd docroot/core
+
+# Run everything in a subshell so we can always cleanup
+(
+  # Exit on fail
+  set -e
+
+  # Run unit tests, this will complete very quickly and will catch early failures
+  ../../vendor/bin/phpunit --group=cloudflare ../modules/program
+
+  # Unit tests passed, boot up a full drupal and run tests
+  ../../vendor/bin/drush site-install standard --yes --account-pass=admin --db-url=mysql://root:@127.0.0.1/simpletest_db
+  ../../vendor/bin/drush config-set system.performance css.preprocess 0 --yes
+  ../../vendor/bin/drush config-set system.performance js.preprocess 0 --yes
+  ../../vendor/bin/drush config-set system.logging error_level all --yes
+  ../../vendor/bin/drush en simpletest cloudflare cloudflarepurger --yes
+
+  # Boot up server and client
+  ../../vendor/bin/drush runserver --default-server=builtin 8888 > /dev/null &
+  echo $! > drush_runserver.pid
+  phantomjs --webdriver=4444 > /dev/null &
+  echo $! > pantomjs.pid
+
+  # Run all tests
+  php scripts/run-tests.sh --module cloudflare --php $(which php) --url http://localhost:8888/ --verbose
+  php scripts/run-tests.sh --module cloudflarepurger --php $(which php) --url http://localhost:8888/ --verbose
+)
+
+# Store the exit status of the subcommand
+exit_status=$?
+
+# kill drush server and phantomjs
+kill -9 `cat drush_runserver.pid`
+kill -9 `cat pantomjs.pid`
+
+# Exit with the exit status
+exit $exit_status

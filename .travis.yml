@@ -20,7 +20,7 @@ cache:
   - "$HOME/.drush/cache"
 
 mysql:
-  database: drupal
+  database: simpletest_db
   username: root
   encoding: utf8
 
@@ -53,25 +53,7 @@ install:
 
   # Let Composer do all the magic!
   - composer install
-  # Install Standard profile.
-  - cd docroot
-  - drush site-install standard --yes --account-pass=admin --db-url=mysql://root:@localhost/drupal
-  - drush config-set system.performance css.preprocess 0 --yes --format=boolean
-  - drush config-set system.performance js.preprocess 0 --yes --format=boolean
-  - drush config-set system.logging error_level all --yes
-  # These directories are not created by default and Drupal will be angry without them!
-  - mkdir $TRAVIS_BUILD_DIR/docroot/profiles
-  - mkdir $TRAVIS_BUILD_DIR/docroot/themes
-
-before_script:
-  - drush runserver --default-server=builtin 8888 &>/dev/null &
-  - phantomjs --webdriver=4444 > /dev/null &
 
 script:
-  - mkdir $TRAVIS_BUILD_DIR/docroot/modules/contrib/cloudflare
-  - rsync --exclude-from=$TRAVIS_BUILD_DIR/docroot $TRAVIS_BUILD_DIR/ $TRAVIS_BUILD_DIR/docroot/modules/contrib/cloudflare
-  - cd $TRAVIS_BUILD_DIR/docroot/modules/contrib/cloudflare
-  - phpcs $TRAVIS_BUILD_DIR/docroot/modules/contrib/cloudflare --standard=$TRAVIS_BUILD_DIR/vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml --ignore=bin,*.css,libraries,modules/contrib
-  - cd $TRAVIS_BUILD_DIR/docroot
-  - drush en simpletest cloudflare --yes
-  - php core/scripts/run-tests.sh --module cloudflare --php $(which php) --url http://localhost:8888/ --verbose
+  - composer test
+  - vendor/bin/phpcs docroot/modules/program --standard=vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml --ignore="bin,*.css,*.md,libraries,modules/contrib"
