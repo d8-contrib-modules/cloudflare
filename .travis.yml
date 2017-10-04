@@ -55,5 +55,5 @@ install:
   - composer install
 
 script:
-  - composer test
+  - ./run-tests.sh
   - composer phpcs

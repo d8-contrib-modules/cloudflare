@@ -27,9 +27,7 @@ cd docroot
 
   # Boot up server and client
   ../vendor/bin/drush runserver --default-server=builtin 8888 > /dev/null &
-  echo $! > drush_runserver.pid
   phantomjs --webdriver=4444 > /dev/null &
-  echo $! > pantomjs.pid
 
   # Run all tests
   php core/scripts/run-tests.sh --module cloudflare --php $(which php) --url http://localhost:8888/ --verbose
@@ -39,9 +37,11 @@ cd docroot
 # Store the exit status of the subcommand
 exit_status=$?
 
+# list jobs to kill
+jobs -p
+
 # kill drush server and phantomjs
-kill -9 `cat drush_runserver.pid`
-kill -9 `cat pantomjs.pid`
+pkill -P $$
 
 # Exit with the exit status
 exit $exit_status
