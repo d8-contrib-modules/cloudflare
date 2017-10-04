@@ -182,11 +182,11 @@ class Zone implements CloudFlareZoneInterface {
       if ($cached = $this->cache->get($cid)) {
         return $cached->data;
       }
-      
+
       else {
         $zones = $this->zoneApi->listZones();
 
-        //@todo come up with a better approach.
+        // @todo come up with a better approach.
         $num_pages = ceil(count($zones) / ZoneApi::MAX_ITEMS_PER_PAGE);
         for ($i = 0; $i < $num_pages; $i++) {
           $this->state->incrementApiRateCount();

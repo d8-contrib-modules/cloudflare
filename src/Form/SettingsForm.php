@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use CloudFlarePhpSdk\Exceptions\CloudFlareException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareTimeoutException;
 use CloudFlarePhpSdk\Exceptions\CloudFlareInvalidCredentialException;
-use \InvalidArgumentException;
+use InvalidArgumentException;
 
 /**
  * Class SettingsForm.

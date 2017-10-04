@@ -46,7 +46,8 @@
     ],
     "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
     "test": "./run-tests.sh",
-    "phpcs": "./vendor/bin/phpcs . --standard=vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml --ignore=\"vendor,docroot,*.md\""
+    "phpcs": "./vendor/bin/phpcs . --standard=vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml --ignore=\"vendor,docroot,*.md\"",
+    "phpcbf": "./vendor/bin/phpcbf . --standard=vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml --ignore=\"vendor,docroot,*.md\""
   },
   "autoload-dev": {
     "psr-4": {
