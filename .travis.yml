@@ -56,4 +56,4 @@ install:
 
 script:
   - composer test
-  - vendor/bin/phpcs docroot/modules/program --standard=vendor/drupal/coder/coder_sniffer/Drupal/ruleset.xml --ignore="bin,*.css,*.md,libraries,modules/contrib"
+  - composer phpcs
