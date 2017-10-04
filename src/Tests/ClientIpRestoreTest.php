@@ -48,6 +48,8 @@ class ClientIpRestoreTest extends UnitTestCase {
    *
    * @param bool $client_ip_restore_enabled
    *   Bool to indicate if client ip restore is enabled.
+   * @param string $host_header
+   *   Host header to send as part of request.
    * @param string $remote_header_ip
    *   The server server ip.
    * @param string $cf_header
