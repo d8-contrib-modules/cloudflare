@@ -56,7 +56,7 @@ To read more about different details, and gotchas [read more here.](https://gith
 ## Running tests
 To run tests:
   - composer install
-  - composer test
+  - ./run-tests.sh
 
 ## Legal
 CloudFlare is a trademark of CloudFlare Inc.  This module has not been built,
