@@ -2,7 +2,7 @@
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
 
-use \DateTime;
+use DateTime;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
 use Drupal\cloudflare\State;
 use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\ApiRateLimitCheck;

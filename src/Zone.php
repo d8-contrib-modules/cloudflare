@@ -109,12 +109,12 @@ class Zone implements CloudFlareZoneInterface {
    *   CloudFlare config object.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The cache backend.
    * @param \Drupal\cloudflare\CloudFlareStateInterface $state
    *   Tracks rate limits associated with CloudFlare Api.
    * @param \CloudFlarePhpSdk\ApiEndpoints\ZoneApi|null $zone_api
    *   ZoneApi instance for accessing api.
-   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
-   *   The cache backend.
    * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $check_interface
    *   Checks that composer dependencies are met.
    */
@@ -180,15 +180,15 @@ class Zone implements CloudFlareZoneInterface {
     try {
 
       if ($cached = $this->cache->get($cid)) {
-       return $cached->data;
+        return $cached->data;
       }
-      
+
       else {
         $zones = $this->zoneApi->listZones();
 
-        //@todo come up with a better approach.
+        // @todo come up with a better approach.
         $num_pages = ceil(count($zones) / ZoneApi::MAX_ITEMS_PER_PAGE);
-        for ($i=0; $i < $num_pages; $i++) {
+        for ($i = 0; $i < $num_pages; $i++) {
           $this->state->incrementApiRateCount();
         }
 

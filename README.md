@@ -53,6 +53,10 @@ You will need to update your composer dependencies:
 ## Gotcha's, Disclaimers, & Technical Notes
 To read more about different details, and gotchas [read more here.](https://github.com/d8-contrib-modules/cloudflare/blob/8.x-1.x/docs/disclaimers.md)
 
+## Running tests
+To run tests:
+  - composer install
+  - ./run-tests.sh
 
 ## Legal
 CloudFlare is a trademark of CloudFlare Inc.  This module has not been built,

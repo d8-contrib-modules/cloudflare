@@ -89,7 +89,7 @@ class ClientIpRestore implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[KernelEvents::REQUEST][] = array('onRequest', 20);
+    $events[KernelEvents::REQUEST][] = ['onRequest', 20];
     return $events;
   }
 

@@ -5,6 +5,8 @@ namespace Drupal\cloudflare\Tests;
 use Drupal\Core\KeyValueStore\KeyValueMemoryFactory;
 use DateTime;
 use Drupal\Tests\UnitTestCase;
+use Drupal\Core\Cache\MemoryBackend;
+use Drupal\Core\Lock\NullLockBackend;
 use Drupal\Core\State\State as CoreState;
 use Drupal\cloudflare\State as CloudFlareState;
 
@@ -33,7 +35,7 @@ class StateTest extends UnitTestCase {
         new DateTime('2010-02-01 00:02:00')
       ));
 
-    $drupal_state_service = new CoreState(new KeyValueMemoryFactory());
+    $drupal_state_service = new CoreState(new KeyValueMemoryFactory(), new MemoryBackend('test'), new NullLockBackend());
     $cloudflare_state = new CloudFlareState($drupal_state_service, $timestamp_stub);
     $initial_count = $cloudflare_state->getTagDailyCount();
     $this->assertEquals(0, $initial_count, 'Tested state with empty counts');
@@ -67,7 +69,7 @@ class StateTest extends UnitTestCase {
         new DateTime('2010-02-03 00:02:00')
       ));
 
-    $drupal_state_service = new CoreState(new KeyValueMemoryFactory());
+    $drupal_state_service = new CoreState(new KeyValueMemoryFactory(), new MemoryBackend('test'), new NullLockBackend());
     $cloudflare_state = new CloudFlareState($drupal_state_service, $timestamp_stub);
     $initial_count = $cloudflare_state->getTagDailyCount();
     $this->assertEquals(0, $initial_count, 'Tested state with empty counts');
@@ -101,7 +103,7 @@ class StateTest extends UnitTestCase {
         new DateTime('2010-02-01 00:02:00')
       ));
 
-    $drupal_state_service = new CoreState(new KeyValueMemoryFactory());
+    $drupal_state_service = new CoreState(new KeyValueMemoryFactory(), new MemoryBackend('test'), new NullLockBackend());
     $cloudflare_state = new CloudFlareState($drupal_state_service, $timestamp_stub);
     $initial_count = $cloudflare_state->getTagDailyCount();
     $this->assertEquals(0, $initial_count, 'Tested state with empty counts');
@@ -137,7 +139,7 @@ class StateTest extends UnitTestCase {
         new DateTime('2010-02-03 00:15:00')
       ));
 
-    $drupal_state_service = new CoreState(new KeyValueMemoryFactory());
+    $drupal_state_service = new CoreState(new KeyValueMemoryFactory(), new MemoryBackend('test'), new NullLockBackend());
     $cloudflare_state = new CloudFlareState($drupal_state_service, $timestamp_stub);
     $initial_count = $cloudflare_state->getApiRateCount();
     $this->assertEquals(0, $initial_count, 'Tested state with empty counts');

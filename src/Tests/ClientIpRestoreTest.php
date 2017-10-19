@@ -48,6 +48,8 @@ class ClientIpRestoreTest extends UnitTestCase {
    *
    * @param bool $client_ip_restore_enabled
    *   Bool to indicate if client ip restore is enabled.
+   * @param string $host_header
+   *   Host header to send as part of request.
    * @param string $remote_header_ip
    *   The server server ip.
    * @param string $cf_header
@@ -81,10 +83,10 @@ class ClientIpRestoreTest extends UnitTestCase {
       ->getMock();
 
     // Create a map of arguments to return values.
-    $map = array(
-      array(ClientIpRestore::CLOUDFLARE_BYPASS_HOST, $bypass_host),
-      array(ClientIpRestore::CLOUDFLARE_CLIENT_IP_RESTORE_ENABLED, $client_ip_restore_enabled),
-    );
+    $map = [
+      [ClientIpRestore::CLOUDFLARE_BYPASS_HOST, $bypass_host],
+      [ClientIpRestore::CLOUDFLARE_CLIENT_IP_RESTORE_ENABLED, $client_ip_restore_enabled],
+    ];
     $config->expects($this->atLeastOnce())
       ->method('get')
       ->will($this->returnValueMap($map));

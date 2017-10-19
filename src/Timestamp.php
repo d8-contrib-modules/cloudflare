@@ -2,7 +2,7 @@
 
 namespace Drupal\cloudflare;
 
-use \DateTime;
+use DateTime;
 
 /**
  * Timestamp class to get datetime.
