@@ -77,10 +77,10 @@ class Zone implements CloudFlareZoneInterface {
   /**
    * {@inheritdoc}
    */
-  public static function create(ConfigFactoryInterface $config, LoggerInterface $logger, CacheBackendInterface $cache, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
-    $cf_config = $config->get('cloudflare.settings');
-    $api_key = $cf_config->get('apikey');
-    $email = $cf_config->get('email');
+  public static function create(ConfigFactoryInterface $config_factory, LoggerInterface $logger, CacheBackendInterface $cache, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
+    $config = $config_factory->get('cloudflare.settings');
+    $api_key = $config->get('apikey');
+    $email = $config->get('email');
 
     // If someone has not correctly installed composer here is where we need to
     // handle it to prevent PHP error.
@@ -93,7 +93,7 @@ class Zone implements CloudFlareZoneInterface {
     }
 
     return new static(
-      $config,
+      $config_factory,
       $logger,
       $cache,
       $state,
@@ -105,8 +105,8 @@ class Zone implements CloudFlareZoneInterface {
   /**
    * Zone constructor.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
-   *   CloudFlare config object.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The configuration factory.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
@@ -118,8 +118,8 @@ class Zone implements CloudFlareZoneInterface {
    * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $check_interface
    *   Checks that composer dependencies are met.
    */
-  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CacheBackendInterface $cache, CloudFlareStateInterface $state, $zone_api, CloudFlareComposerDependenciesCheckInterface $check_interface) {
-    $this->config = $config->get('cloudflare.settings');
+  public function __construct(ConfigFactoryInterface $config_factory, LoggerInterface $logger, CacheBackendInterface $cache, CloudFlareStateInterface $state, $zone_api, CloudFlareComposerDependenciesCheckInterface $check_interface) {
+    $this->config = $config_factory->get('cloudflare.settings');
     $this->logger = $logger;
     $this->cache = $cache;
     $this->state = $state;

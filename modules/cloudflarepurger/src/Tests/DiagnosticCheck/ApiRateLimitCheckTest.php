@@ -2,7 +2,6 @@
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
 
-use DateTime;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
 use Drupal\cloudflare\State;
 use Drupal\cloudflarepurger\Plugin\Purge\DiagnosticCheck\ApiRateLimitCheck;
@@ -29,7 +28,7 @@ class ApiRateLimitCheckTest extends DiagnosticCheckTestBase {
    */
   public function testApiRateLimitCheck($api_rate, $expected_severity) {
     $this->drupalState->set(State::API_RATE_COUNT, $api_rate);
-    $this->drupalState->set(State::API_RATE_COUNT_START, new DateTime());
+    $this->drupalState->set(State::API_RATE_COUNT_START, new \DateTime());
 
     $api_rate_limit_check = new ApiRateLimitCheck([], '23123', 'this is a definition', $this->cloudflareState, $this->composerDependencyStub);
     $actual_severity = $api_rate_limit_check->run();

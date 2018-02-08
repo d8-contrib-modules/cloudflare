@@ -67,7 +67,7 @@ class ClientIpRestore implements EventSubscriberInterface {
   /**
    * Constructs a ClientIpRestore.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
    *   Cache backend.
@@ -76,10 +76,10 @@ class ClientIpRestore implements EventSubscriberInterface {
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
    */
-  public function __construct(ConfigFactoryInterface $config, CacheBackendInterface $cache, ClientInterface $http_client, LoggerInterface $logger) {
+  public function __construct(ConfigFactoryInterface $config_factory, CacheBackendInterface $cache, ClientInterface $http_client, LoggerInterface $logger) {
     $this->httpClient = $http_client;
     $this->cache = $cache;
-    $this->config = $config->get('cloudflare.settings');
+    $this->config = $config_factory->get('cloudflare.settings');
     $this->logger = $logger;
     $this->isClientIpRestoreEnabled = $this->config->get(SELF::CLOUDFLARE_CLIENT_IP_RESTORE_ENABLED);
     $this->bypassHost = $this->config->get(SELF::CLOUDFLARE_BYPASS_HOST);

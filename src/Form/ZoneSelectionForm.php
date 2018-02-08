@@ -21,12 +21,41 @@ use Drupal\Core\Url;
  * @package Drupal\cloudflare\Form
  */
 class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface {
+
+  /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * Wrapper to access the CloudFlare zone api.
+   *
+   * @var \Drupal\cloudflare\CloudFlareZoneInterface
+   */
+  protected $zoneApi;
+
+  /**
+   * A logger instance for CloudFlare.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
   /**
    * List of the zones for the current Api credentials.
    *
    * @var array
    */
   protected $zones;
+
+  /**
+   * Boolean indicates if CloudFlare dependencies have been met.
+   *
+   * @var bool
+   */
+  protected $cloudFlareComposerDependenciesMet;
 
   /**
    * Tracks if the current CloudFlare account has multiple zones.
@@ -54,7 +83,7 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
   /**
    * Constructs a new ZoneSelectionForm.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
    * @param \Drupal\cloudflare\CloudFlareZoneInterface $zone_api
    *   ZoneApi instance for accessing api.
@@ -63,9 +92,9 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
    * @param bool $composer_dependencies_met
    *   Checks that the composer dependencies for CloudFlare are met.
    */
-  public function __construct(ConfigFactoryInterface $config, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, $composer_dependencies_met) {
-    $this->configFactory = $config;
-    $this->config = $config->getEditable('cloudflare.settings');
+  public function __construct(ConfigFactoryInterface $config_factory, CloudFlareZoneInterface $zone_api, LoggerInterface $logger, $composer_dependencies_met) {
+    $this->configFactory = $config_factory;
+    $this->config = $config_factory->getEditable('cloudflare.settings');
     $this->zoneApi = $zone_api;
     $this->logger = $logger;
     $this->cloudFlareComposerDependenciesMet = $composer_dependencies_met;
@@ -81,7 +110,7 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
         $this->hasMultipleZones = count($this->zones) > 1;
       }
       catch (CloudFlareTimeoutException $e) {
-        drupal_set_message("Unable to connect to CloudFlare. You will not be able to change the selected Zone.", 'error');
+        drupal_set_message($this->t('Unable to connect to CloudFlare. You will not be able to change the selected Zone.'), 'error');
       }
     }
   }
@@ -209,6 +238,7 @@ class ZoneSelectionForm extends FormBase implements ContainerInjectionInterface 
     $matches = [];
 
     // Tracks if the current CloudFlare account has multiple zones.
+    /** @var \CloudFlarePhpSdk\ApiTypes\Zone\Zone $zone */
     foreach ($this->zoneApi->listZones() as $zone) {
       if (stripos($zone->getName(), $zone_autocomplete_text) === 0) {
         $matches[] = ['value' => $zone->getZoneId(), 'label' => $zone->getName()];

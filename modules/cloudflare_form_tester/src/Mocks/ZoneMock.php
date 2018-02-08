@@ -71,10 +71,10 @@ class ZoneMock implements CloudFlareZoneInterface {
   /**
    * {@inheritdoc}
    */
-  public static function create(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
+  public static function create(ConfigFactoryInterface $config_factory, LoggerInterface $logger, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
 
     return new static(
-      $config,
+      $config_factory,
       $logger,
       $state,
       $check_interface
@@ -84,8 +84,8 @@ class ZoneMock implements CloudFlareZoneInterface {
   /**
    * Zone constructor.
    *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
-   *   CloudFlare config object.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    * @param \Psr\Log\LoggerInterface $logger
    *   A logger instance.
    * @param \Drupal\cloudflare\CloudFlareStateInterface $state
@@ -93,8 +93,8 @@ class ZoneMock implements CloudFlareZoneInterface {
    * @param \Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface $check_interface
    *   Checks that composer dependencies are met.
    */
-  public function __construct(ConfigFactoryInterface $config, LoggerInterface $logger, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
-    $this->config = $config->get('cloudflare.settings');
+  public function __construct(ConfigFactoryInterface $config_factory, LoggerInterface $logger, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
+    $this->config = $config_factory->get('cloudflare.settings');
     $this->logger = $logger;
     $this->state = $state;
     $this->zone = $this->config->get('zone');
