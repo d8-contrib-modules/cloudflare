@@ -2,7 +2,6 @@
 
 namespace Drupal\cloudflarepurger\Tests\DiagnosticCheck;
 
-use DateTime;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\purge\Plugin\Purge\DiagnosticCheck\DiagnosticCheckInterface;
 use Drupal\cloudflare\State;
@@ -39,7 +38,7 @@ class DailyTagPurgeLimitCheckTest extends DiagnosticCheckTestBase {
    */
   public function testDailyTagPurgeLimitCheck($api_rate, $expected_severity) {
     $this->drupalState->set(State::TAG_PURGE_DAILY_COUNT, $api_rate);
-    $this->drupalState->set(State::TAG_PURGE_DAILY_COUNT_START, new DateTime());
+    $this->drupalState->set(State::TAG_PURGE_DAILY_COUNT_START, new \DateTime());
 
     $api_rate_limit_check = new DailyTagPurgeLimitCheck([], '23123', 'this is a definition', $this->cloudflareState, $this->composerDependencyStub);
     $actual_severity = $api_rate_limit_check->run();

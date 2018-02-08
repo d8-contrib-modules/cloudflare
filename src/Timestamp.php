@@ -2,8 +2,6 @@
 
 namespace Drupal\cloudflare;
 
-use DateTime;
-
 /**
  * Timestamp class to get datetime.
  *
@@ -15,7 +13,7 @@ class Timestamp implements CloudFlareTimestampInterface {
    * {@inheritdoc}
    */
   public function now() {
-    return new DateTime();
+    return new \DateTime();
   }
 
 }

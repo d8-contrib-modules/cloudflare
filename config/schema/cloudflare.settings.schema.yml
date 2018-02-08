@@ -1,4 +1,4 @@
- # Schema for the configuration files of the CloudFlare module.
+# Schema for the configuration files of the CloudFlare module.
 cloudflare.settings:
   type: config_object
   label: 'CloudFlare Config'
