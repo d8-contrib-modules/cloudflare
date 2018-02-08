@@ -43,16 +43,33 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
   }
 
   /**
+   * Return an edit array with the supplied credentials.
+   *
+   * @param string $apikey
+   *   The API key to use.
+   *
+   * @return array
+   *   The edit array.
+   */
+  protected function getTestCredentials($apikey) {
+    return [
+      'credentials[credential_provider]' => 'cloudflare',
+      'credentials[providers][cloudflare][apikey]' => $apikey,
+      'credentials[providers][cloudflare][email]' => 'test@test.com',
+    ];
+  }
+
+  /**
    * Tests that form has critical fields as expected.
    */
   public function testConfigFormDisplay() {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet($this->route);
     $this->assertText('This will help suppress log warnings regarding requests bypassing CloudFlare', 'Helper Text');
-    $this->assertField('apikey', 'Make sure that the Api Key field is visible..');
-    $this->assertField('email', 'Make sure the edit email field is visible.');
-    $this->assertField('client_ip_restore_enabled', 'Make sure the Restore Client Ip Address checkbox is visible.');
-    $this->assertField('bypass_host', 'Make sure the bypass host field is visible.');
+    $this->assertField('credentials[providers][cloudflare][apikey]', 'Make sure that the Api Key field is visible.');
+    $this->assertField('credentials[providers][cloudflare][email]', 'Make sure the edit email field is visible.');
+    $this->assertField('general[client_ip_restore_enabled]', 'Make sure the Restore Client Ip Address checkbox is visible.');
+    $this->assertField('general[bypass_host]', 'Make sure the bypass host field is visible.');
   }
 
   /**
@@ -85,11 +102,7 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
     $container->set('cloudflare.zone', $zone_mock);
 
     $this->drupalLogin($this->adminUser);
-    $edit = [
-      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
-      'email' => 'test@test.com',
-    ];
-    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->drupalPostForm($this->route, $this->getTestCredentials('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g'), t('Next'));
     $this->assertUrl('/admin/config/services/cloudflare');
   }
 
@@ -99,12 +112,8 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
   public function testUpperCaseInvalidCredentials() {
     ZoneMock::mockAssertValidCredentials(TRUE);
     ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
-    $edit = [
-      'apikey' => 'fDK5M9sf51x6CEAspHSUYM4vt40m5XC2T6i1K',
-      'email' => 'test@test.com',
-    ];
     $this->drupalLogin($this->adminUser);
-    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->drupalPostForm($this->route, $this->getTestCredentials('fDK5M9sf51x6CEAspHSUYM4vt40m5XC2T6i1K'), t('Next'));
     $this->assertText('Invalid Api Key: Key can only contain lowercase or numerical characters.');
   }
 
@@ -114,12 +123,8 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
   public function testInvalidKeyLength() {
     ZoneMock::mockAssertValidCredentials(TRUE);
     ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
-    $edit = [
-      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g0',
-      'email' => 'test@test.com',
-    ];
     $this->drupalLogin($this->adminUser);
-    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->drupalPostForm($this->route, $this->getTestCredentials('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g0'), t('Next'));
     $this->assertText('Invalid Api Key: Key should be 37 chars long.');
   }
 
@@ -129,12 +134,8 @@ class CloudFlareAdminSettingsInvalidFormTest extends WebTestBase {
   public function testInvalidKeySpecialChars() {
     ZoneMock::mockAssertValidCredentials(TRUE);
     ComposerDependenciesCheckMock::mockComposerDependenciesMet(FALSE);
-    $edit = [
-      'apikey' => '!8ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
-      'email' => 'test@test.com',
-    ];
     $this->drupalLogin($this->adminUser);
-    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->drupalPostForm($this->route, $this->getTestCredentials('!8ow48650j63zfzx1w9jd29cr367u0ezb6a4g'), t('Next'));
     $this->assertText('Invalid Api Key: Key can only contain alphanumeric characters.');
   }
 

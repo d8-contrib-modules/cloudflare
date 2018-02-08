@@ -2,5 +2,13 @@ client_ip_restore_enabled: false
 bypass_host: ''
 valid_credentials: false
 zone_id: ''
-apikey: ''
-email: ''
+credential_provider: 'cloudflare'
+credentials:
+  cloudflare:
+    email: ''
+    apikey: ''
+  key:
+    email: ''
+    apikey_key: ''
+  multikey:
+    email_apikey_key: ''

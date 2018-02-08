@@ -3,6 +3,7 @@
 namespace Drupal\cloudflarepurger\Plugin\Purge\Purger;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\cloudflare\CloudFlareCredentials;
 use Drupal\cloudflare\CloudFlareStateInterface;
 use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
 use Drupal\cloudflarepurger\EventSubscriber\CloudFlareCacheTagHeaderGenerator;
@@ -166,8 +167,9 @@ class CloudFlarePurger extends PurgerBase implements PurgerInterface {
     // This is a unique case where the ApiSdk is being accessed directly and not
     // via a service.  Purging should only ever happen through the purge module
     // which is why this is NOT in a service.
-    $api_key = $this->config->get('apikey');
-    $email = $this->config->get('email');
+    $credentials = new CloudFlareCredentials($this->config);
+    $api_key = $credentials->getApikey();
+    $email = $credentials->getEmail();
     $this->zone = $this->config->get('zone_id');
     $this->zoneApi = new ZoneApi($api_key, $email);
 
