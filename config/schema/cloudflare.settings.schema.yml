@@ -19,11 +19,41 @@ cloudflare.settings:
       type: string
       label: 'CloudFlare ZoneId corresponding to the site domain.'
       translatable: false
-    apikey:
-      type: string
-      label: 'ApiKey used to authenticate against CloudFlare'
-      translatable: false
+    credential_provider:
+      type: 'string'
+      label: 'Credential provider'
+    credentials:
+      type: sequence
+      label: 'Credentials'
+      sequence:
+        type: cloudflare.credentials.[%key]
+
+cloudflare.credentials.cloudflare:
+  type: mapping
+  label: 'Cloudflare credentials'
+  mapping:
     email:
       type: string
-      label: 'Email used to authenticate against CloudFlare.'
-      translatable: false
+      label: 'Email'
+    apikey:
+      type: string
+      label: 'API Key'
+
+cloudflare.credentials.key:
+  type: mapping
+  label: 'Cloudflare credentials with Key Module'
+  mapping:
+    email:
+      type: string
+      label: 'Email'
+    apikey_key:
+      type: string
+      label: 'API key'
+
+cloudflare.credentials.multikey:
+  type: mapping
+  label: 'Cloudflare credentials with Key Module (user/password keys)'
+  mapping:
+    email_apikey_key:
+      type: string
+      label: 'Email/API key (User/Password)'

@@ -79,8 +79,9 @@ class Zone implements CloudFlareZoneInterface {
    */
   public static function create(ConfigFactoryInterface $config_factory, LoggerInterface $logger, CacheBackendInterface $cache, CloudFlareStateInterface $state, CloudFlareComposerDependenciesCheckInterface $check_interface) {
     $config = $config_factory->get('cloudflare.settings');
-    $api_key = $config->get('apikey');
-    $email = $config->get('email');
+    $credentials = new CloudFlareCredentials($config);
+    $api_key = $credentials->getApikey();
+    $email = $credentials->getEmail();
 
     // If someone has not correctly installed composer here is where we need to
     // handle it to prevent PHP error.

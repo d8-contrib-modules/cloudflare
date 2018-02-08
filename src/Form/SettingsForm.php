@@ -8,6 +8,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\cloudflare\CloudFlareCredentials;
 use Drupal\cloudflare\CloudFlareStateInterface;
 use Drupal\cloudflare\CloudFlareZoneInterface;
 use Drupal\cloudflare\CloudFlareComposerDependenciesCheckInterface;
@@ -140,8 +141,11 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // Nest submitted form values.
+    $form['#tree'] = TRUE;
+
     $config = $this->configFactory->get('cloudflare.settings');
-    $form = array_merge($form, $this->buildApiCredentialsSection($config));
+    $form = array_merge($form, $this->buildApiCredentialsSection($config, $form_state));
     $form = array_merge($form, $this->buildZoneSelectSection($config));
     $form = array_merge($form, $this->buildGeneralConfig($config));
 
@@ -151,10 +155,9 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
     if (!$this->cloudFlareComposerDependenciesMet) {
       drupal_set_message((CloudFlareComposerDependenciesCheckInterface::ERROR_MESSAGE), 'error');
 
-      $form['api_credentials_fieldset']['apikey']['#disabled'] = TRUE;
-      $form['api_credentials_fieldset']['email']['#disabled'] = TRUE;
-      $form['cloudflare_config']['client_ip_restore_enabled']['#disabled'] = TRUE;
-      $form['cloudflare_config']['bypass_host']['#disabled'] = TRUE;
+      $form['credentials']['credential_provider']['#disabled'] = TRUE;
+      $form['general']['client_ip_restore_enabled']['#disabled'] = TRUE;
+      $form['general']['bypass_host']['#disabled'] = TRUE;
       $form['actions']['submit']['#disabled'] = TRUE;
     }
 
@@ -166,30 +169,102 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
    *
    * @param \Drupal\Core\Config\Config $config
    *   The readonly configuration.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
    *
    * @return array
    *   Form Api render array with credentials section.
    */
-  protected function buildApiCredentialsSection(Config $config) {
+  protected function buildApiCredentialsSection(Config $config, FormStateInterface $form_state) {
     $section = [];
 
-    $section['api_credentials_fieldset'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('API Credentials'),
+    $section['credentials'] = [
+      '#id' => 'credentials',
+      '#type' => 'details',
+      '#title' => $this->t('Credentials'),
+      '#open' => TRUE,
     ];
-    $section['api_credentials_fieldset']['apikey'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('CloudFlare API Key'),
-      '#description' => $this->t('Your API key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
-      '#default_value' => $config->get('apikey'),
-      '#required' => TRUE,
+
+    $credential_provider = $config->get('credential_provider');
+    $credential_provider = ($form_state->hasValue(['credentials', 'credential_provider'])) ? $form_state->getValue(['credentials', 'credential_provider']) : $credential_provider;
+
+    $section['credentials']['credential_provider'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Credential provider'),
+      '#options' => [
+        'cloudflare' => $this->t('Local configuration'),
+      ],
+      '#default_value' => $credential_provider,
+      '#ajax' => [
+        'callback' => [$this, 'ajaxCallback'],
+        'wrapper' => 'credentials_configuration',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ],
     ];
-    $section['api_credentials_fieldset']['email'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Account e-mail address'),
-      '#default_value' => $config->get('email'),
-      '#required' => TRUE,
+
+    $section['credentials']['providers'] = [
+      '#type' => 'item',
+      '#id' => 'credentials_configuration',
     ];
+
+    if (\Drupal::moduleHandler()->moduleExists('key')) {
+      $section['credentials']['credential_provider']['#options']['key'] = $this->t('Key Module');
+
+      /** @var \Drupal\key\Plugin\KeyPluginManager $key_type */
+      $key_type = \Drupal::service('plugin.manager.key.key_type');
+      if ($key_type->hasDefinition('user_password')) {
+        $section['credentials']['credential_provider']['#options']['multikey'] = $this->t('Key Module (user/password)');
+      }
+    }
+
+    if ($credential_provider == 'cloudflare') {
+      $section['credentials']['providers']['cloudflare']['email'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Account e-mail address'),
+        '#default_value' => $config->get('credentials.cloudflare.email'),
+        '#required' => TRUE,
+      ];
+      $section['credentials']['providers']['cloudflare']['apikey'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('CloudFlare API Key'),
+        '#default_value' => $config->get('credentials.cloudflare.apikey'),
+        '#description' => $this->t('Your API key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
+        '#required' => TRUE,
+      ];
+    }
+    elseif ($credential_provider == 'key') {
+      $email = $config->get('credentials.key.email');
+      if (empty($email)) {
+        $email = $config->get('credentials.cloudflare.email');
+      }
+      $section['credentials']['providers']['key']['email'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Account e-mail address'),
+        '#default_value' => $email,
+        '#required' => TRUE,
+      ];
+      $section['credentials']['providers']['key']['apikey_key'] = [
+        '#type' => 'key_select',
+        '#title' => $this->t('API Key'),
+        '#default_value' => $config->get('credentials.key.apikey_key'),
+        '#empty_option' => $this->t('- Please select -'),
+        '#key_filters' => ['type' => 'authentication'],
+        '#description' => $this->t('Your API key stored as a secure key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
+        '#required' => TRUE,
+      ];
+    }
+    elseif ($credential_provider == 'multikey') {
+      $section['credentials']['providers']['multikey']['email_apikey_key'] = [
+        '#type' => 'key_select',
+        '#title' => $this->t('Email/API key (User/Password)'),
+        '#default_value' => $config->get('credentials.multikey.email_apikey_key'),
+        '#empty_option' => $this->t('- Please select -'),
+        '#key_filters' => ['type' => 'user_password'],
+        '#description' => $this->t('Your account e-mail address and API key stored as a secure key. Get it at <a href="https://www.cloudflare.com/a/account/my-account">cloudflare.com/a/account/my-account</a>.'),
+        '#required' => TRUE,
+      ];
+    }
 
     return $section;
   }
@@ -263,19 +338,19 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
   protected function buildGeneralConfig(Config $config) {
     $section = [];
 
-    $section['cloudflare_config'] = [
+    $section['general'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Configuration'),
     ];
 
-    $section['cloudflare_config']['client_ip_restore_enabled'] = [
+    $section['general']['client_ip_restore_enabled'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Restore Client Ip Address'),
       '#description' => $this->t('CloudFlare operates as a reverse proxy and replaces the client IP address. This setting will restore it.<br /> Read more <a href="https://support.cloudflare.com/hc/en-us/articles/200170986-How-does-CloudFlare-handle-HTTP-Request-headers-">here</a>.'),
       '#default_value' => $config->get('client_ip_restore_enabled'),
     ];
 
-    $section['cloudflare_config']['bypass_host'] = [
+    $section['general']['bypass_host'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Host to Bypass CloudFlare'),
       '#description' => $this->t('Optional: Specify a host (no http/https) used for authenticated users to edit the site that bypasses CloudFlare. <br /> This will help suppress log warnings regarding requests bypassing CloudFlare.'),
@@ -290,8 +365,12 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // Get the email address and apikey.
-    $email = trim($form_state->getValue('email'));
-    $apikey = trim($form_state->getValue('apikey'));
+    $credentials = new CloudFlareCredentials();
+    $credential_provider = $form_state->getValue(['credentials', 'credential_provider']);
+    $credentials_values = $form_state->getValue(['credentials', 'providers']);
+    $credentials->setCredentials($credential_provider, $credentials_values);
+    $email = $credentials->getEmail();
+    $apikey = $credentials->getApikey();
 
     // Validate the email address.
     if (!$this->emailValidator->isValid($email)) {
@@ -305,25 +384,25 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
     }
     catch (CloudFlareTimeoutException $e) {
       $message = $this->t('Unable to connect to CloudFlare in order to validate credentials. Connection timed out. Please try again later.');
-      $form_state->setErrorByName('apikey', $message);
+      $form_state->setErrorByName('providers', $message);
       $this->logger->error($message);
       return;
     }
     catch (CloudFlareInvalidCredentialException $e) {
-      $form_state->setErrorByName('apiKey', $e->getMessage());
+      $form_state->setErrorByName('providers', $e->getMessage());
       return;
     }
     catch (CloudFlareException $e) {
-      $form_state->setErrorByName('apikey', $this->t("An unknown error has occurred when attempting to connect to CloudFlare's API") . $e->getMessage());
+      $form_state->setErrorByName('providers', $this->t("An unknown error has occurred when attempting to connect to CloudFlare's API") . $e->getMessage());
       return;
     }
 
     // Validate the bypass host.
-    $bypass_host = trim($form_state->getValue('bypass_host'));
+    $bypass_host = trim($form_state->getValue(['general', 'bypass_host']));
     if (!empty($bypass_host)) {
       // Validate the bypass host does not begin with http.
       if (strpos($bypass_host, 'http') > -1) {
-        $form_state->setErrorByName('$bypass_host', $this->t('Please enter a host without http/https'));
+        $form_state->setErrorByName('bypass_host', $this->t('Please enter a host without http/https'));
         return;
       }
 
@@ -342,21 +421,35 @@ class SettingsForm extends FormBase implements ContainerInjectionInterface {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $api_key = trim($form_state->getValue('apikey'));
-    $email = trim($form_state->getValue('email'));
-
     // Deslash the host URL.
-    $bypass_host = trim(rtrim($form_state->getValue('bypass_host'), "/"));
-    $client_ip_restore_enabled = $form_state->getValue('client_ip_restore_enabled');
+    $bypass_host = trim(rtrim($form_state->getValue(['general', 'bypass_host']), "/"));
+    $client_ip_restore_enabled = $form_state->getValue(['general', 'client_ip_restore_enabled']);
 
+    // Save the configuration.
+    $credential_provider = $form_state->getValue(['credentials', 'credential_provider']);
     $config = $this->configFactory->getEditable('cloudflare.settings');
+    $credentials = $form_state->getValue([
+      'credentials',
+      'providers',
+      $credential_provider,
+    ]);
     $config
-      ->set('apikey', $api_key)
-      ->set('email', $email)
       ->set('valid_credentials', TRUE)
       ->set('bypass_host', $bypass_host)
-      ->set('client_ip_restore_enabled', $client_ip_restore_enabled);
+      ->set('client_ip_restore_enabled', $client_ip_restore_enabled)
+      ->set('credential_provider', $credential_provider)
+      ->set("credentials.$credential_provider", $credentials);
     $config->save();
+  }
+
+  /**
+   * Ajax callback for the credential dependent configuration options.
+   *
+   * @return array
+   *   The form element containing the configuration options.
+   */
+  public static function ajaxCallback($form, FormStateInterface $form_state) {
+    return $form['credentials']['providers'];
   }
 
 }

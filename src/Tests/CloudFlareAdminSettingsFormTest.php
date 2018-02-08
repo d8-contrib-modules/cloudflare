@@ -43,15 +43,25 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
   }
 
   /**
+   * Return an edit array with the supplied credentials.
+   *
+   * @return array
+   *   The edit array.
+   */
+  protected function getTestCredentials() {
+    return [
+      'credentials[credential_provider]' => 'cloudflare',
+      'credentials[providers][cloudflare][apikey]' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
+      'credentials[providers][cloudflare][email]' => 'test@test.com',
+    ];
+  }
+
+  /**
    * Test posting an invalid host to the form.
    */
   public function testValidCredentials() {
-    $edit = [
-      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
-      'email' => 'test@test.com',
-    ];
     ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
-    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->drupalPostForm($this->route, $this->getTestCredentials(), t('Next'));
     $this->assertUrl('/admin/config/services/cloudflare/two?js=nojs');
     $this->drupalPostForm(NULL, [], t('Finish'));
     $this->assertRaw('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g');
@@ -64,13 +74,9 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
    */
   public function testMultiZoneSelection() {
     ZoneMock::mockAssertValidCredentials(TRUE);
-    $edit = [
-      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
-      'email' => 'test@test.com',
-    ];
     ComposerDependenciesCheckMock::mockComposerDependenciesMet(TRUE);
     ZoneMock::mockMultiZoneAccount(TRUE);
-    $this->drupalPostForm($this->route, $edit, t('Next'));
+    $this->drupalPostForm($this->route, $this->getTestCredentials(), t('Next'));
     $this->assertUrl('/admin/config/services/cloudflare/two?js=nojs');
     $this->drupalPostForm(NULL, ['zone_selection' => "123456789999"], t('Finish'));
     $this->assertRaw('68ow48650j63zfzx1w9jd29cr367u0ezb6a4g');
@@ -81,12 +87,6 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
    * Test posting an invalid host with https protocol to the form.
    */
   public function testInvalidBypassHostWithHttps() {
-    $edit = [
-      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
-      'email' => 'test@test.com',
-      'client_ip_restore_enabled' => TRUE,
-      'bypass_host' => 'https://blah.com',
-    ];
     ZoneMock::mockAssertValidCredentials(TRUE);
     $container = \Drupal::getContainer();
     $config_factory = $container->get('config.factory');
@@ -97,6 +97,10 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
     $zone_mock = new ZoneMock($config_factory, $logger_channel_cloudflare, $cloudflare_state, $composer_dependencies_check);
     $container->set('cloudflare.zone', $zone_mock);
 
+    $edit = [
+      'general[client_ip_restore_enabled]' => TRUE,
+      'general[bypass_host]' => 'https://blah.com',
+    ] + $this->getTestCredentials();
     $this->drupalPostForm($this->route, $edit, t('Next'));
     $this->assertText('Please enter a host without http/https');
   }
@@ -105,13 +109,12 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
    * Test posting an invalid host with http protocol to the form.
    */
   public function testInvalidBypassHostWithHttp() {
-    $edit = [
-      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
-      'email' => 'test@test.com',
-      'client_ip_restore_enabled' => TRUE,
-      'bypass_host' => 'http://blah.com',
-    ];
     ZoneMock::mockAssertValidCredentials(TRUE);
+
+    $edit = [
+      'general[client_ip_restore_enabled]' => TRUE,
+      'general[bypass_host]' => 'http://blah.com',
+    ] + $this->getTestCredentials();
     $this->drupalPostForm($this->route, $edit, t('Next'));
     $this->assertText('Please enter a host without http/https');
   }
@@ -121,11 +124,9 @@ class CloudFlareAdminSettingsFormTest extends WebTestBase {
    */
   public function testInvalidBypassHost() {
     $edit = [
-      'apikey' => '68ow48650j63zfzx1w9jd29cr367u0ezb6a4g',
-      'email' => 'test@test.com',
-      'client_ip_restore_enabled' => TRUE,
-      'bypass_host' => 'blah!@#!@',
-    ];
+      'general[client_ip_restore_enabled]' => TRUE,
+      'general[bypass_host]' => 'blah!@#!@',
+    ] + $this->getTestCredentials();
     $this->drupalPostForm($this->route, $edit, t('Next'));
     $this->assertText('You have entered an invalid host.');
   }

@@ -48,3 +48,20 @@ function cloudflare_requirements($phase) {
 function cloudflare_update_8001(&$sandbox) {
   \Drupal::service('module_installer')->install(['ctools']);
 }
+
+/**
+ * Convert user and pass config to credential provider config.
+ */
+function cloudflare_update_8002() {
+  $config = \Drupal::configFactory()->getEditable('cloudflare.settings');
+  $email = $config->get('email');
+  if ($email) {
+    $config
+      ->set('credential_provider', 'config')
+      ->set('credentials.cloudflare.email', $email)
+      ->set('credentials.cloudflare.apikey', $config->get('apikey'))
+      ->clear('email')
+      ->clear('apikey')
+      ->save(TRUE);
+  }
+}
